@@ -1,2 +1,1 @@
-# Pakki-Engine
-2d pelimoottori
+pakki-engine
