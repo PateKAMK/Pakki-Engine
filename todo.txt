@@ -15,3 +15,7 @@ profilointi jutut?
 
 pool pointer getting ja pointerilla deletointi
 quick sort omaan projektiin
+
+/**relevantit **/
+
+testaa screen pos ja tee singlettoni siitä
