@@ -1,6 +1,6 @@
 #pragma once
-//#define P_WINDOWS
-#define P_ANDROID
+#define P_WINDOWS
+//#define P_ANDROID
 //#define P_LINUX
 #ifdef P_WINDOWS
 #define LOGI(...) printf(__VA_ARGS__)

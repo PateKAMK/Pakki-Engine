@@ -1,0 +1,17 @@
+ikkuna resize
+input systeemi
+parempi time step
+render‰ys uudestaan
+komponent systeemi
+lis‰‰ ui juttuja
+uv leikkaus automaattiseksi
+vectoreiden uudelleen teko
+sprite anime
+tiedosto tyypit?
+profilointi jutut?
+
+
+/** array juttuja**/
+
+pool pointer getting ja pointerilla deletointi
+quick sort omaan projektiin
