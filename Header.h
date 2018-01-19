@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdint.h>
+#include <new>
 
 template<typename T>
 class dynamicArray final
@@ -17,9 +18,15 @@ public:
 	{
 		data = (T*)malloc(sizeof(T) * init_size);
 		_allocated_size = init_size;
+		call_constructors(init_size);
 	};
 	~dynamicArray()
 	{
+		/*call destructors*/
+		for(auto i = 0; i < _allocated_size; i ++)
+		{
+			data[i++].~T();
+		}
 		free(data);
 	}
 
@@ -65,13 +72,18 @@ public:
 	void clear_array()
 	{
 		_size = 0;
+		for (auto i = 0; i < _allocated_size; i++)
+		{
+			data[i++].~T();
+		}
 	}
 	void resize_array(uint32_t new_size)
 	{
 		if (new_size > _allocated_size)
 		{
+			realloc(data, _sizeof(T) *(size_t)new_size);
+			call_constructors(new_size - _allocated_size);
 			_allocated_size = new_size;
-			realloc(data, _sizeof(T) *(size_t)_allocated_size);
 		}
 	}
 	T* get_new_item()
@@ -89,6 +101,15 @@ public:
 		}
 		return data[size++];
 	}
+private:
+	void call_constructors(uint32_t size)
+	{
+		for(auto i = 0;i < size;i++ )
+		{
+			new (&data[_size + i]) T();
+		}
+	}
+	
 };
 
 //todo

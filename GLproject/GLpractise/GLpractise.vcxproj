@@ -74,8 +74,8 @@
     <LibraryPath>C:\Users\Pate\Desktop\graphics programming\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\..\include;$(ProjectDir)\includes;C:\Users\Pate\Desktop\pakki-engine\include\fmod\lowlevel\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Pate\Desktop\pakki-engine\include\fmod\lowlevel\lib\windows;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\include;$(ProjectDir)\includes;C:\Users\Patrikbro\Desktop\Pakki-Engine\include\fmod\lowlevel\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Patrikbro\Desktop\Pakki-Engine\include\fmod\lowlevel\lib\windows;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ReferencePath>$(VC_ReferencesPath_x64);</ReferencePath>
@@ -153,11 +153,13 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="physics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Header.h" />
     <ClInclude Include="InputManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
