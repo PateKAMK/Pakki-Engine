@@ -3,8 +3,8 @@
 
 #include <projectDefinitions.h>
 #ifndef P_ANDROID
-#include "fmod.hpp"
-#include "fmod_errors.h"
+#include <fmod\fmod.hpp>
+#include <fmod\fmod_errors.h>
 
 class soundsystem {
 

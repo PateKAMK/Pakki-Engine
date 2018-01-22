@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D3445B78-3235-4F8C-80BB-1805D676F654}</ProjectGuid>
     <RootNamespace>GLpractise</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -41,7 +41,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -75,12 +75,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>..\..\include;$(ProjectDir)\includes;C:\Users\Patrikbro\Desktop\Pakki-Engine\include\fmod\lowlevel\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Patrikbro\Desktop\Pakki-Engine\include\fmod\lowlevel\lib\windows;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\Pate\Documents\Pakki-Engine\include\fmod;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ReferencePath>$(VC_ReferencesPath_x64);</ReferencePath>
-    <IncludePath>$(ProjectDir)\includes;..\..\include;C:\Users\Pate\Desktop\pakki-engine\include\fmod\lowlevel\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs-rel;C:\Users\Pate\Desktop\pakki-engine\include\fmod\lowlevel\lib\windows;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\includes;..\..\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs-rel;C:\Users\Pate\Documents\Pakki-Engine\include\fmod;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
