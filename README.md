@@ -10,3 +10,6 @@ welcome!
 
 ## used libraries
 - [glad](https://github.com/Dav1dde/glad)
+- [glm] (https://glm.g-truc.net/0.9.8/index.html)
+- [FMOD] (https://www.fmod.com/)
+- [stb_image] (https://github.com/nothings/stb/blob/master/stb_image.h)
