@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D3445B78-3235-4F8C-80BB-1805D676F654}</ProjectGuid>
     <RootNamespace>GLpractise</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -41,7 +41,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -74,8 +74,8 @@
     <LibraryPath>C:\Users\Pate\Desktop\graphics programming\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\..\include;$(ProjectDir)\includes;C:\Users\Patrikbro\Desktop\Pakki-Engine\include\fmod\lowlevel\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Pate\Documents\Pakki-Engine\include\fmod;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\include;$(ProjectDir)\..\..\include\fmod\lowlevel\inc;$(ProjectDir)\includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\..\..\include\fmod\lowlevel\lib\windows;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ReferencePath>$(VC_ReferencesPath_x64);</ReferencePath>
