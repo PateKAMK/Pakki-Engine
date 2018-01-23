@@ -1,7 +1,7 @@
 
 # PakkiEngine Github pages
 
-welcome!
+**Welcome!**
 
 ## What is PakkiEngine?
 
@@ -12,9 +12,12 @@ welcome!
 - spritebatching
 - audio
 - android support
+- PakkiGUI
+- PakkiPhysics
 
+## Projects done over time
 
-## used libraries
+## Used libraries
 - [glad](https://github.com/Dav1dde/glad)
 - [glm](https://glm.g-truc.net/0.9.8/index.html)
 - [FMOD](https://www.fmod.com/)
