@@ -1,7 +1,9 @@
 
-# welcome to PakkiEngine GitHub Pages
+# PakkiEngine Github pages
 
-## what is this
+welcome!
+
+## what is PakkiEngine?
 
 This game engine is developed with c++ using opengl 3+ rendering
 This is done as part of school project and will be developed further
