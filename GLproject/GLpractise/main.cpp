@@ -234,11 +234,11 @@ int main(int argc,const char **argv)
 			}
 		}
 
-		/*glEnable(GL_SCISSOR_TEST);
-		glScissor(0, 0, 500, 500);*/
-		//glScissor(500, 500, 100, 100);
+//		glEnable(GL_SCISSOR_TEST);
+
+//		glScissor(300, 300, 300, 300);
 		num_draw_calls += engine_draw(&engine);
-		//glDisable(GL_SCISSOR_TEST);
+//		glDisable(GL_SCISSOR_TEST);
 		Pakki::render(&context);
 		glfwSwapBuffers(window);
 

@@ -16,8 +16,9 @@ namespace PakkiPhysics
 	};
 	struct simulated
 	{
-		float velX;
-		float velY;
+		vec2 velocity;
+		vec2 acceleration;
+		float mass;
 	};
 
 	struct Static
@@ -240,6 +241,15 @@ namespace PakkiPhysics
 	}
 	void update_objects(worldScene& scene,float dt)
 	{
+
+		for(uint32_t i = 0; i < scene.objects.get_size();i++)
+		{
+			object* currentobj = scene.objects.data[i];
+			if(currentobj->t == type::simulateObj)
+			{
+				currentobj->pos = vec2{ (currentobj->m.velocity.x + currentobj->pos.x)* currentobj->m.mass , (currentobj->m.velocity.y + currentobj->pos.y)* currentobj->m.mass };
+			}
+		}
 		scene.treeAllocatorSize = 1;
 		for(int i = 0; i < scene.objects.get_size();i++)
 		{
@@ -281,6 +291,12 @@ namespace PakkiPhysics
 		clear_tree(scene.treeAllocator);
 		collisionbuffer.dispose_array();
 		//**handle collisions**//
+		for(uint32_t i = 0; i < scene.objects.get_size();i++)
+		{
+
+			object* currentobject = scene.objects.data[i];
+
+		}
 		collisiontable.dispose_array();
 		//**handle genereal updates**//
 	}
