@@ -23,3 +23,4 @@
 - [FMOD](https://www.fmod.com/)
 - [stb_image](https://github.com/nothings/stb/blob/master/stb_image.h)
 - [GLFW](http://www.glfw.org/)
+- [Freetype2](https://www.freetype.org/)
