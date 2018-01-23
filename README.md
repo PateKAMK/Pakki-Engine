@@ -17,6 +17,8 @@
 
 ## Projects done over time
 
+![GitHub Logo](shootter_demo.gif)
+
 ## Used libraries
 - [glad](https://github.com/Dav1dde/glad)
 - [glm](https://glm.g-truc.net/0.9.8/index.html)
