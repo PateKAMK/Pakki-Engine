@@ -247,7 +247,7 @@ namespace PakkiPhysics
 			object* currentobj = scene.objects.data[i];
 			if(currentobj->t == type::simulateObj)
 			{
-				currentobj->pos = vec2{ (currentobj->m.velocity.x + currentobj->pos.x)* currentobj->m.mass , (currentobj->m.velocity.y + currentobj->pos.y)* currentobj->m.mass };
+				currentobj->pos = vec2{ currentobj->m.velocity.x + currentobj->pos.x , currentobj->m.velocity.y + currentobj->pos.y };
 			}
 		}
 		scene.treeAllocatorSize = 1;
@@ -331,22 +331,26 @@ namespace PakkiPhysics
 				currentobject->m.acceleration.x += scene.gravity.x;
 				currentobject->m.acceleration.y += scene.gravity.y;
 
+				currentobject->m.velocity.x += currentobject->m.acceleration.x;
+				currentobject->m.velocity.y += currentobject->m.acceleration.y;
 				/*support force*/
-				
+				currentobject->m.acceleration = vec2{ 0 };
 				 
 				
 				currentobject->pos.x += supportforce.x;
 				currentobject->pos.y += supportforce.y;
 
 				//tee yksikkö vectori
-				float accLenght = sqrt(currentobject->m.acceleration.x * currentobject->m.acceleration.x + currentobject->m.acceleration.y * currentobject->m.acceleration.y);
+				float velLenght = sqrt(currentobject->m.velocity.x * currentobject->m.velocity.x + currentobject->m.velocity.y * currentobject->m.velocity.y);
 				float supplenght = sqrt(supportforce.x * supportforce.x + supportforce.y * supportforce.y);
-				supportforce = supplenght == 0 ? vec2{ 0 } : vec2{(supportforce.x / supplenght)* accLenght,(supportforce.y / supplenght) * accLenght};
-				currentobject->m.acceleration
+				supportforce = supplenght == 0 ? vec2{ 0 } : vec2{(supportforce.x / supplenght)* velLenght,(supportforce.y / supplenght) * velLenght };
+
+				currentobject->m.velocity.x += supportforce.x;
+				currentobject->m.velocity.y += supportforce.y;
 			}
 
 		}
 		collisiontable.dispose_array();
-		//**handle genereal updates**//
+		
 	}
 }
