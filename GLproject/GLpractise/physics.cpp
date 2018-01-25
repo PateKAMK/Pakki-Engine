@@ -295,6 +295,55 @@ namespace PakkiPhysics
 		{
 
 			object* currentobject = scene.objects.data[i];
+			vec2 supportforce{ 0 };
+			for(uint32_t j = 0; j < collisiontable.get_size();j++)
+			{
+				collisionTable* currentTable = &collisiontable.data[j];
+				if(currentTable->obj1 == currentobject ||currentTable->obj2 == currentobject)
+				{
+					object* collider = currentTable->obj1 == currentobject ? currentTable->obj2 : currentTable->obj1;
+					if (currentobject->t == type::simulateObj)
+					{
+						if(collider->t == type::staticObj)
+						{
+							vec2 suppF{ 0 };
+							suppF.x = collider->pos.x - currentobject->pos.x;
+							suppF.y = collider->pos.y - currentobject->pos.y;
+							vec2 addOn = abs(suppF.x) < abs(collider->dim.x + currentobject->dim.x) ? vec2{ collider->dim.x + currentobject->dim.x , 0 } :
+								vec2{ 0 ,  collider->dim.y + currentobject->dim.y };
+							supportforce.x += suppF.x + addOn.x;
+							supportforce.y += suppF.y + addOn.y;
+						}
+						else if(collider->t == type::simulateObj) // todo
+						{
+						
+						}
+					}
+					else if (currentobject->t == type::staticObj)// no need for this?
+					{
+
+					}
+				}
+			}
+
+			if (currentobject->t == type::simulateObj)
+			{
+				currentobject->m.acceleration.x += scene.gravity.x;
+				currentobject->m.acceleration.y += scene.gravity.y;
+
+				/*support force*/
+				
+				 
+				
+				currentobject->pos.x += supportforce.x;
+				currentobject->pos.y += supportforce.y;
+
+				//tee yksikkö vectori
+				float accLenght = sqrt(currentobject->m.acceleration.x * currentobject->m.acceleration.x + currentobject->m.acceleration.y * currentobject->m.acceleration.y);
+				float supplenght = sqrt(supportforce.x * supportforce.x + supportforce.y * supportforce.y);
+				supportforce = supplenght == 0 ? vec2{ 0 } : vec2{(supportforce.x / supplenght)* accLenght,(supportforce.y / supplenght) * accLenght};
+				currentobject->m.acceleration
+			}
 
 		}
 		collisiontable.dispose_array();
