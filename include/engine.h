@@ -24,7 +24,9 @@ struct engine {
 	void*			platformState;
 	DebugRenderer*	drenderer;
 	glm::vec2		mousePos;
+#ifndef  OUT_OF_DATE
 	Entities		objects;
+#endif // ! OUT_O
 	int				widht, height;
 	keys			key;
 };

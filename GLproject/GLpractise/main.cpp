@@ -188,7 +188,7 @@ int main(int argc,const char **argv)
 		Pakki::text(&context, "profile");
 		Pakki::checkbox(&context, &audio, Pakki::SameLine);
 		Pakki::text(&context, "audio");
-		Pakki::checkbox(&context, &engine.objects.debuglines, Pakki::SameLine);
+		Pakki::checkbox(&context, &profiler, Pakki::SameLine);
 		Pakki::text(&context, "debug");
 		Pakki::end_window(&context);
 		if(profiler)
@@ -197,7 +197,7 @@ int main(int argc,const char **argv)
 			Pakki::text(&context, "FPS %d", (int) currentFps);
 			Pakki::text(&context, "FrameTime %f", time[index]);
 			Pakki::text(&context, "NumDrawcalls %d",num_draw_calls);
-			Pakki::text(&context, "objects %d", engine.objects.numEntities);
+			Pakki::text(&context, "objects %d", 0);
 			Pakki::end_window(&context);
 		}
 		num_draw_calls = 0;

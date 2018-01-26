@@ -1,4 +1,6 @@
 #include "entities.h"
+#ifndef OUT_OF_DATE
+
 #include<string.h>
 #include<dybamic_array.h>
 #include <filesystem.h>
@@ -980,5 +982,6 @@ void tester()
 	clear_tree(&node);
 }
 
+#endif
 
 

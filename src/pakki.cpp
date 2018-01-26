@@ -428,7 +428,7 @@ namespace Pakki
 
 			data->color = Color{ 255,255,255,255 };
 			data->txtID = font->txtid;
-			assert(font->txtid == 5);
+			//assert(font->txtid == 5);
 			data->position = glm::vec2(x2 + (wi / 2), -y2 - (he / 2));
 			*w += wi / 2;
 			data->dimensions = glm::vec2(wi / 2, he / 2);
@@ -547,7 +547,7 @@ namespace Pakki
 
 			data->color = Color{ 255,255,255,255 };
 			data->txtID = font->txtid;
-			assert(font->txtid == 5);
+			//assert(font->txtid == 5);
 			data->position = glm::vec2(x2 + (wi / 2), -y2  - (he / 2) );
 			data->dimensions = glm::vec2(wi / 2,he / 2 );
 			data->uv = glm::vec4(font->character[*p].tx, 1 - (font->character[*p].ty + (font->character[*p].bh / font->h)) , font->character[*p].bw / font->w, (font->character[*p].bh / font->h));

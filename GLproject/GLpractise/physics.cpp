@@ -1,13 +1,10 @@
-#include "../Header.h"
+
 #include <algorithm>
 #include <new>
+#include "physics.h"
 namespace PakkiPhysics
 {
-	typedef struct
-	{
-		float	x;
-		float	y;
-	} vec2;
+
 
 	enum class type
 	{
@@ -17,7 +14,6 @@ namespace PakkiPhysics
 	struct simulated
 	{
 		vec2 velocity;
-		vec2 acceleration;
 		float mass;
 	};
 
@@ -195,35 +191,7 @@ namespace PakkiPhysics
 	/***************************SCENE STUFF****************************/
 	struct worldScene
 	{
-		worldScene(vec2 worldCentrePos,vec2 worldDimensions):objects(100),treeAllocator(nullptr),treeAllocatorSize(0)
-		{
-			constexpr uint32_t poolamount = 1 + 4 * 4 * 4;
-			treeAllocator = (tree*)malloc(sizeof(tree) * poolamount);
-			memset(treeAllocator, 0, sizeof(tree)*poolamount);
-			objectAllocator.init_pool();
-			objects.init_array(100);
-			updateobjects.init_array(50);
-			treeAllocatorSize = 1;
-			this->worldCentrePos = worldCentrePos;
-			create_new_node(treeAllocator, 0, worldCentrePos, worldDimensions);
-			treeAllocatorSize++;
-		}
-		~worldScene()
-		{
-			constexpr uint32_t poolamount = 1 + 4 * 4 * 4;
-			for(uint32_t i = 0; i < poolamount; i++)
-			{
-				if(treeAllocator[i].objects.data)
-				{
-					treeAllocator[i].objects.dispose_array();
-				}
-			}
-			free(treeAllocator);
-			treeAllocator = NULL;
-			objectAllocator.dispose_pool();
-			objects.dispose_array();
-			updateobjects.dispose_array();
-		}
+
 		pool<object>			objectAllocator;
 		dynamicArray<object*>	objects;
  		tree*					treeAllocator;
@@ -233,6 +201,34 @@ namespace PakkiPhysics
 		vec2					worldCentrePos;
 		vec2					worldWidht;
 	};
+    void init_scene(worldScene* scene,vec2 worldCentrePos,vec2 worldDimensions)
+    {
+        constexpr uint32_t poolamount = 1 + 4 * 4 * 4;
+        scene->treeAllocator = (tree*)malloc(sizeof(tree) * poolamount);
+        memset(scene->treeAllocator, 0, sizeof(tree)*poolamount);
+        scene->objectAllocator.init_pool();
+        scene->objects.init_array(100);
+        scene->updateobjects.init_array(50);
+        scene->treeAllocatorSize = 1;
+        scene->worldCentrePos = worldCentrePos;
+        create_new_node(scene->treeAllocator, 0, worldCentrePos, worldDimensions);
+    }
+    void dispose_scene(worldScene* scene)
+    {
+        constexpr uint32_t poolamount = 1 + 4 * 4 * 4;
+        for (uint32_t i = 0; i < poolamount; i++)
+        {
+            if (scene->treeAllocator[i].objects.data)
+            {
+                scene->treeAllocator[i].objects.dispose_array();
+            }
+        }
+        free(scene->treeAllocator);
+        scene->treeAllocator = NULL;
+        scene->objectAllocator.dispose_pool();
+        scene->objects.dispose_array();
+        scene->updateobjects.dispose_array();
+    }
 	bool AABB(const object* obj1, const object* obj2)
 	{
 		float disx = std::abs(obj1->pos.x - obj2->pos.x);
@@ -328,13 +324,12 @@ namespace PakkiPhysics
 
 			if (currentobject->t == type::simulateObj)
 			{
-				currentobject->m.acceleration.x += scene.gravity.x;
-				currentobject->m.acceleration.y += scene.gravity.y;
+				currentobject->m.velocity.x += scene.gravity.x * dt;
+				currentobject->m.velocity.y += scene.gravity.y * dt;
 
-				currentobject->m.velocity.x += currentobject->m.acceleration.x;
-				currentobject->m.velocity.y += currentobject->m.acceleration.y;
+			
 				/*support force*/
-				currentobject->m.acceleration = vec2{ 0 };
+
 				 
 				
 				currentobject->pos.x += supportforce.x;

@@ -1,4 +1,8 @@
 #pragma once
+#define OUT_OF_DATE
+#ifndef OUT_OF_DATE
+
+
 #include <spritebatch.h>
 #include <debugrendering.h>
 //#include <filesystem.h>
@@ -114,5 +118,6 @@ struct Entities
 void init_entities(Entities* objects, engine* eng, DebugRenderer* debuggerR); // ota debugpois
 void push_objects_to_batch(Entities* objects,SpriteBatch* batch,DebugRenderer* dbug);
 void update_objects(Entities* objects, keys* key);
+#endif // !OUT_OF_DATE
 
 //void tester();
