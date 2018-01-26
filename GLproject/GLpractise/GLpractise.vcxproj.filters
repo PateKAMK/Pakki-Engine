@@ -69,10 +69,10 @@
     <ClCompile Include="..\..\src\soundsystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InputManager.cpp">
+    <ClCompile Include="..\..\src\physics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="physics.cpp">
+    <ClCompile Include="..\..\src\InputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,13 +80,13 @@
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="InputManager.h">
+    <ClInclude Include="..\..\include\arrayD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Header.h">
+    <ClInclude Include="..\..\include\InputManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="physics.h">
+    <ClInclude Include="..\..\include\physics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

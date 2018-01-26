@@ -1,7 +1,10 @@
-
 #include <algorithm>
 #include <new>
-#include "physics.h"
+#include <physics.h>
+#include <glm\glm\common.hpp>
+#include <Texture.h>
+#include <engine.h>
+
 namespace PakkiPhysics
 {
 
@@ -52,7 +55,6 @@ namespace PakkiPhysics
 	void create_new_node(tree* node, uint32_t level,const vec2& pos,const vec2& dim)
 	{
 		node->level = level;
-		node->pos = pos;
 		node->pos = pos;
 		node->level = level;
 		node->dim = dim;
@@ -189,7 +191,7 @@ namespace PakkiPhysics
 	}
 
 	/***************************SCENE STUFF****************************/
-	struct worldScene
+	/*struct worldScene
 	{
 
 		pool<object>			objectAllocator;
@@ -200,10 +202,12 @@ namespace PakkiPhysics
 		vec2					gravity;
 		vec2					worldCentrePos;
 		vec2					worldWidht;
-	};
-    void init_scene(worldScene* scene,vec2 worldCentrePos,vec2 worldDimensions)
+	};*/
+    static uint32_t testID = 0;
+    void init_scene(worldScene* scene,vec2 worldCentrePos,vec2 worldDimensions, uint32_t texID)
     {
         constexpr uint32_t poolamount = 1 + 4 * 4 * 4;
+        memset(scene, 0, sizeof *scene);
         scene->treeAllocator = (tree*)malloc(sizeof(tree) * poolamount);
         memset(scene->treeAllocator, 0, sizeof(tree)*poolamount);
         scene->objectAllocator.init_pool();
@@ -212,6 +216,24 @@ namespace PakkiPhysics
         scene->treeAllocatorSize = 1;
         scene->worldCentrePos = worldCentrePos;
         create_new_node(scene->treeAllocator, 0, worldCentrePos, worldDimensions);
+        testID = texID;
+
+        object* Terrain = scene->objectAllocator.new_item();
+        object* Box = scene->objectAllocator.new_item();
+
+        Terrain->pos = vec2{ 100,100 };
+        Terrain->dim = vec2{ 30,30 };
+        Terrain->t = type::staticObj;
+        
+        Box->dim = vec2{ 5,5 };
+        Box->pos = vec2{ 100,180 };
+        Box->t = type::simulateObj;
+        Box->m.mass = 1;
+        Box->m.velocity = vec2{ 0,0 };
+        scene->objects.push_back(Terrain);
+        scene->objects.push_back(Box);
+
+        scene->gravity.y = -1.811f;
     }
     void dispose_scene(worldScene* scene)
     {
@@ -235,7 +257,7 @@ namespace PakkiPhysics
 		float disY = std::abs(obj1->pos.y - obj2->pos.y);
 		return disx < obj1->dim.x + obj2->dim.y && disY < obj1->dim.y + obj2->dim.y;
 	}
-	void update_objects(worldScene& scene,float dt)
+	void update_objects(worldScene& scene,float dt, keys* k)
 	{
 
 		for(uint32_t i = 0; i < scene.objects.get_size();i++)
@@ -243,6 +265,21 @@ namespace PakkiPhysics
 			object* currentobj = scene.objects.data[i];
 			if(currentobj->t == type::simulateObj)
 			{
+                if(k->arrowU)
+                {
+                    currentobj->m.velocity.y += 4.f * dt;
+                }
+                if (k->arrowL)
+                {
+                    currentobj->m.velocity.x -= 4.f * dt;
+                }
+                if (k->arrowR)
+                {
+                    currentobj->m.velocity.x += 4.f * dt;
+                }
+
+                currentobj->m.velocity.x += scene.gravity.x * dt;
+                currentobj->m.velocity.y += scene.gravity.y * dt;
 				currentobj->pos = vec2{ currentobj->m.velocity.x + currentobj->pos.x , currentobj->m.velocity.y + currentobj->pos.y };
 			}
 		}
@@ -254,21 +291,23 @@ namespace PakkiPhysics
 
 		dynamicArray<collisionTable> collisiontable;
 		dynamicArray<object*> collisionbuffer;
+        collisionbuffer.init_array();
+        collisiontable.init_array();
 		for(uint32_t i = 0; i < scene.objects.get_size();i++)
 		{
 			object* currentobj = scene.objects.data[i];
 			get_collisions(scene.treeAllocator,&collisionbuffer , currentobj);
 
-			for (int i = 0; i < collisionbuffer.get_size();i++)
+			for (int j = 0; j < collisionbuffer.get_size();j++)
 			{
-				object* collider = collisionbuffer.data[i];
+				object* collider = collisionbuffer.data[j];
 				if (currentobj == collider) continue;
 				if (AABB(currentobj,collider))//collides
 				{
 					bool insert = true;
-					for (uint32_t j = 0; j < collisiontable.get_size(); j++)
+					for (uint32_t jj = 0; jj < collisiontable.get_size(); jj++)
 					{
-						if (collisiontable.data[j].obj1 == currentobj && collider == collisiontable.data[j].obj2)
+						if (collisiontable.data[jj].obj1 == currentobj && collider == collisiontable.data[jj].obj2)
 						{
 							insert = false;
 							break;
@@ -303,12 +342,18 @@ namespace PakkiPhysics
 						if(collider->t == type::staticObj)
 						{
 							vec2 suppF{ 0 };
-							suppF.x = collider->pos.x - currentobject->pos.x;
-							suppF.y = collider->pos.y - currentobject->pos.y;
-							vec2 addOn = abs(suppF.x) < abs(collider->dim.x + currentobject->dim.x) ? vec2{ collider->dim.x + currentobject->dim.x , 0 } :
-								vec2{ 0 ,  collider->dim.y + currentobject->dim.y };
-							supportforce.x += suppF.x + addOn.x;
-							supportforce.y += suppF.y + addOn.y;
+                            suppF = abs(collider->pos.x - currentobject->pos.x) > abs(collider->pos.y - currentobject->pos.y) ? vec2{collider->pos.x - currentobject->pos.x + currentobject->dim.x + collider->dim.x,
+                               0} : vec2{0, collider->pos.y - currentobject->pos.y + currentobject->dim.y + collider->dim.y };
+
+							//suppF.x = collider->pos.x - currentobject->pos.x;
+							//suppF.y = collider->pos.y - currentobject->pos.y;
+							//vec2 addOn = abs(suppF.x) > abs(suppF.y/*collider->dim.x + currentobject->dim.x)*/) ? vec2{ collider->dim.x + currentobject->dim.x , 0 } :
+							//	vec2{ 0 ,  collider->dim.y + currentobject->dim.y };
+
+
+
+							supportforce.x += suppF.x ;
+							supportforce.y += suppF.y;
 						}
 						else if(collider->t == type::simulateObj) // todo
 						{
@@ -324,14 +369,7 @@ namespace PakkiPhysics
 
 			if (currentobject->t == type::simulateObj)
 			{
-				currentobject->m.velocity.x += scene.gravity.x * dt;
-				currentobject->m.velocity.y += scene.gravity.y * dt;
-
-			
-				/*support force*/
-
-				 
-				
+                 //support force
 				currentobject->pos.x += supportforce.x;
 				currentobject->pos.y += supportforce.y;
 
@@ -342,10 +380,26 @@ namespace PakkiPhysics
 
 				currentobject->m.velocity.x += supportforce.x;
 				currentobject->m.velocity.y += supportforce.y;
+                int reeee = 10;
 			}
 
 		}
 		collisiontable.dispose_array();
-		
+        object** ite = scene.objects.data;
+        (*ite)->dim;
 	}
+    void draw_objects(worldScene* scene, SpriteBatch* batch)
+    {
+        for (object** iterator = scene->objects.data; iterator != scene->objects.get_back() + 1; iterator++)
+        {
+            glm::vec4 destRec;
+            destRec.x = (*iterator)->pos.x - (*iterator)->dim.x;
+            destRec.y = (*iterator)->pos.y - (*iterator)->dim.y;
+            destRec.z = (*iterator)->dim.x * 2;
+            destRec.w = (*iterator)->dim.y * 2;
+            glm::vec4 uv(0, 0, 1, 1);
+            Color color{ (GLubyte)255, (GLubyte)255, (GLubyte)255,(GLubyte)255 };
+            push_to_batch(batch, &destRec, &uv, testID, &color, 0, 0);
+        }
+    }
 }

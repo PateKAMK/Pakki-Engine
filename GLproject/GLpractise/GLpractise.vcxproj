@@ -143,25 +143,25 @@
     <ClCompile Include="..\..\src\entities.cpp" />
     <ClCompile Include="..\..\src\filesystem.cpp" />
     <ClCompile Include="..\..\src\freetype.cpp" />
+    <ClCompile Include="..\..\src\InputManager.cpp" />
     <ClCompile Include="..\..\src\pakki.cpp" />
     <ClCompile Include="..\..\src\pakki_utilities.cpp" />
+    <ClCompile Include="..\..\src\physics.cpp" />
     <ClCompile Include="..\..\src\shader.cpp" />
     <ClCompile Include="..\..\src\soundsystem.cpp" />
     <ClCompile Include="..\..\src\spritebatch.cpp" />
     <ClCompile Include="..\..\src\stb_image.cpp" />
     <ClCompile Include="..\..\src\window.cpp" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="physics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Header.h" />
-    <ClInclude Include="InputManager.h" />
-    <ClInclude Include="physics.h" />
+    <ClInclude Include="..\..\include\arrayD.h" />
+    <ClInclude Include="..\..\include\InputManager.h" />
+    <ClInclude Include="..\..\include\physics.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

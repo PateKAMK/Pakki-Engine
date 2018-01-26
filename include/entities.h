@@ -56,6 +56,7 @@ typedef struct
 	vec2			velocity;
 	bool			spawned;
 } Starfield;
+
 typedef struct
 {
 	float		alpha; // same offset as meteor hack

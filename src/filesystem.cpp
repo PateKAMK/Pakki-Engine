@@ -79,7 +79,7 @@ namespace FileSystem
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.widht, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 				glGenerateMipmap(GL_TEXTURE_2D);
 			}
-			if (texture.channels == 4)
+			else if (texture.channels == 4)
 			{
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.widht, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 				glGenerateMipmap(GL_TEXTURE_2D);

@@ -5,6 +5,7 @@
 #include <spritebatch.h>
 #include <debugrendering.h>
 #include <entities.h>
+#include <physics.h>
 //#include <freetype.h>
 enum class EngineStates:int
 {
@@ -27,6 +28,10 @@ struct engine {
 #ifndef  OUT_OF_DATE
 	Entities		objects;
 #endif // ! OUT_O
+#ifdef OUT_OF_DATE
+    PakkiPhysics::worldScene      scene;
+#endif // OUT_OF_DATE
+
 	int				widht, height;
 	keys			key;
 };

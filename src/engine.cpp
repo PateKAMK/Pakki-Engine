@@ -80,9 +80,10 @@ void engine_init(engine* engine,Camera* camera,Shader* shader)
 	glCheckError();
 	//init_fonts(engine->text);
 #ifndef OUT_OF_DATE
-
-
 	init_entities(&engine->objects, engine,engine->drenderer);
+#else
+    memset(&engine->scene, 0, sizeof(PakkiPhysics::worldScene));
+    PakkiPhysics::init_scene(&engine->scene, PakkiPhysics::vec2{ 100,100 }, PakkiPhysics::vec2{ 50,50 },FileSystem::load_sprite(laatikko,engine).ID);
 #endif // !OUT_OF_DATE
 	LOGI("engine inited\n");
 }
@@ -127,6 +128,9 @@ void engine_events(engine* engine, double deltaTime, float fps)
 #ifndef OUT_OF_DATE
 	update_objects(&engine->objects,&engine->key);
 	push_objects_to_batch(&engine->objects, engine->batch,engine->drenderer);
+#else
+    PakkiPhysics::update_objects(engine->scene,deltaTime,&engine->key);
+    PakkiPhysics::draw_objects(&engine->scene, engine->batch);
 #endif
 	post_batch_process(engine->batch);
 	populate_debugrender_buffers(engine->drenderer);
@@ -146,5 +150,6 @@ void engine_clearup(engine* engine)
 	dispose_batch(engine->batch);
 	dispose_shader(engine->shader);
 	dispose_debug_renderer(engine->drenderer);
+    PakkiPhysics::dispose_scene(&engine->scene);
 	//dispose_fonts(engine->text);
 }

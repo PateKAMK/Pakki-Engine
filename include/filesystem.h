@@ -23,6 +23,9 @@
 #define JPG_FILES(FILE) \
 		FILE(wall)		\
 		FILE(lataus)	\
+        FILE(laatikko)  \
+
+
 
 #define GENERATE_ENUM(ENUM) ENUM,
 
@@ -30,15 +33,18 @@
 
 #define GENERATE_STRINGPNG(STRING) #STRING".png",
 
-#define GENERATE_STRINGJPG(STRING) #STRING".jpg"
+#define GENERATE_STRINGJPG(STRING) #STRING".jpg",
 
 static const char* txt_file_names[] = {
 	TXT_FILES(GENERATE_STRING)
 };
+
 static const char* pic_file_names[] = {
 	PNG_FILES(GENERATE_STRINGPNG)
+
 	JPG_FILES(GENERATE_STRINGJPG)
 };
+
 enum txt_files
 {
 	TXT_FILES(GENERATE_ENUM)

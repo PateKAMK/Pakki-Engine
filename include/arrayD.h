@@ -144,6 +144,8 @@ public:
 	{
 		_currentArraySize = 0;
 		T* newdata = (T*)malloc(sizeof(T)* poolSize);
+        _data.init_array();
+        _freelist.init_array();
 		_data.push_back(newdata);
 	}
 	void dispose_pool()

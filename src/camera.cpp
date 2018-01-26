@@ -11,9 +11,10 @@ void init_camera(Camera* const camera, int screenWidht, int screenHeight)
 	camera->scaledDimensions.x = screenWidht;
 	camera->scaledDimensions.y = screenHeight;
 	camera->update = true;
+    camera->scale = 3.f;
 	::screenHeigh = screenHeight;
 	::screenWidht = screenWidht;
-	camera->position = glm::vec2{ 1000 , 1000};
+	camera->position = glm::vec2{ 100 , 100};
 }
 void update_camera(Camera* const camera)
 {
