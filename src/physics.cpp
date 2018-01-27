@@ -330,7 +330,6 @@ namespace PakkiPhysics
 		{
 
 			object* currentobject = scene.objects.data[i];
-			vec2 supportforce{ 0 };
 			for(uint32_t j = 0; j < collisiontable.get_size();j++)
 			{
 				collisionTable* currentTable = &collisiontable.data[j];
@@ -341,19 +340,32 @@ namespace PakkiPhysics
 					{
 						if(collider->t == type::staticObj)
 						{
-							vec2 suppF{ 0 };
-                            suppF = abs(collider->pos.x - currentobject->pos.x) > abs(collider->pos.y - currentobject->pos.y) ? vec2{collider->pos.x - currentobject->pos.x + currentobject->dim.x + collider->dim.x,
+			            
+							vec2 supportforce{ 0 };
+                            supportforce = abs(collider->pos.x - currentobject->pos.x) > abs(collider->pos.y - currentobject->pos.y) ? vec2{collider->pos.x - currentobject->pos.x + currentobject->dim.x + collider->dim.x,
                                0} : vec2{0, collider->pos.y - currentobject->pos.y + currentobject->dim.y + collider->dim.y };
+
 
 							//suppF.x = collider->pos.x - currentobject->pos.x;
 							//suppF.y = collider->pos.y - currentobject->pos.y;
 							//vec2 addOn = abs(suppF.x) > abs(suppF.y/*collider->dim.x + currentobject->dim.x)*/) ? vec2{ collider->dim.x + currentobject->dim.x , 0 } :
 							//	vec2{ 0 ,  collider->dim.y + currentobject->dim.y };
 
+							//supportforce.x += suppF.x;
+							//supportforce.y += suppF.y;
+
+                            currentobject->pos.x += supportforce.x;
+                            currentobject->pos.y += supportforce.y;
 
 
-							supportforce.x += suppF.x ;
-							supportforce.y += suppF.y;
+                            float velLenght = sqrt(currentobject->m.velocity.x * currentobject->m.velocity.x + currentobject->m.velocity.y * currentobject->m.velocity.y);
+                            float supplenght = sqrt(supportforce.x * supportforce.x + supportforce.y * supportforce.y);
+                            supportforce = supplenght == 0 ? vec2{ 0 } : vec2{ (supportforce.x / supplenght)* velLenght,(supportforce.y / supplenght) * velLenght };
+
+                            currentobject->m.velocity.x += supportforce.x;
+                            currentobject->m.velocity.y += supportforce.y;
+
+
 						}
 						else if(collider->t == type::simulateObj) // todo
 						{
@@ -367,21 +379,17 @@ namespace PakkiPhysics
 				}
 			}
 
-			if (currentobject->t == type::simulateObj)
-			{
-                 //support force
-				currentobject->pos.x += supportforce.x;
-				currentobject->pos.y += supportforce.y;
+			//if (currentobject->t == type::simulateObj)
+			//{
+   //              //support force
+			//	currentobject->pos.x += supportforce.x;
+			//	currentobject->pos.y += supportforce.y;
 
-				//tee yksikkö vectori
-				float velLenght = sqrt(currentobject->m.velocity.x * currentobject->m.velocity.x + currentobject->m.velocity.y * currentobject->m.velocity.y);
-				float supplenght = sqrt(supportforce.x * supportforce.x + supportforce.y * supportforce.y);
-				supportforce = supplenght == 0 ? vec2{ 0 } : vec2{(supportforce.x / supplenght)* velLenght,(supportforce.y / supplenght) * velLenght };
-
-				currentobject->m.velocity.x += supportforce.x;
-				currentobject->m.velocity.y += supportforce.y;
-                int reeee = 10;
-			}
+ 
+			//	//tee yksikkö vectori
+			//	
+   //             int reeee = 10;
+			//}
 
 		}
 		collisiontable.dispose_array();
