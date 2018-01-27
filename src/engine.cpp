@@ -129,7 +129,10 @@ void engine_events(engine* engine, double deltaTime, float fps)
 	update_objects(&engine->objects,&engine->key);
 	push_objects_to_batch(&engine->objects, engine->batch,engine->drenderer);
 #else
-    PakkiPhysics::update_objects(engine->scene,deltaTime,&engine->key);
+    for(int i = 0; i < 1;i++)
+    {
+        PakkiPhysics::update_objects(engine->scene, deltaTime / 1.f, &engine->key);
+    }
     PakkiPhysics::draw_objects(&engine->scene, engine->batch);
 #endif
 	post_batch_process(engine->batch);

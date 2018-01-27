@@ -191,19 +191,9 @@ namespace PakkiPhysics
 	}
 
 	/***************************SCENE STUFF****************************/
-	/*struct worldScene
-	{
 
-		pool<object>			objectAllocator;
-		dynamicArray<object*>	objects;
- 		tree*					treeAllocator;
-		uint32_t				treeAllocatorSize;
-		dynamicArray<object*>	updateobjects;
-		vec2					gravity;
-		vec2					worldCentrePos;
-		vec2					worldWidht;
-	};*/
     static uint32_t testID = 0;
+    static object* player = NULL;
     void init_scene(worldScene* scene,vec2 worldCentrePos,vec2 worldDimensions, uint32_t texID)
     {
         constexpr uint32_t poolamount = 1 + 4 * 4 * 4;
@@ -224,16 +214,47 @@ namespace PakkiPhysics
         Terrain->pos = vec2{ 100,100 };
         Terrain->dim = vec2{ 30,30 };
         Terrain->t = type::staticObj;
-        
+        Terrain->s.friction = 0.90f;
+
+
         Box->dim = vec2{ 5,5 };
         Box->pos = vec2{ 100,180 };
         Box->t = type::simulateObj;
         Box->m.mass = 1;
         Box->m.velocity = vec2{ 0,0 };
-        scene->objects.push_back(Terrain);
-        scene->objects.push_back(Box);
+        player = Box;
 
-        scene->gravity.y = -1.811f;
+        object* Box2 = scene->objectAllocator.new_item();
+        Box2->dim = vec2{ 5,5 };
+        Box2->pos = vec2{ 100 ,180  + 20};
+        Box2->t = type::simulateObj;
+        Box2->m.mass = 0.5f;
+        Box2->m.velocity = vec2{ 0,0 };
+
+
+        object* Terrain2 = scene->objectAllocator.new_item();
+        Terrain2->pos = vec2{ 100 - 60,100+ 60 };
+        Terrain2->dim = vec2{ 30,30 };
+        Terrain2->t = type::staticObj;
+        Terrain2->s.friction = 0.90f;
+
+
+        object* Terrain3 = scene->objectAllocator.new_item();
+        Terrain3->pos = vec2{ 100 + 60,100 + 60 };
+        Terrain3->dim = vec2{ 30,30 };
+        Terrain3->t = type::staticObj;
+        Terrain3->s.friction = 0.90f;
+
+
+        scene->objects.push_back(Terrain);
+        scene->objects.push_back(Terrain2);
+        scene->objects.push_back(Terrain3);
+        scene->objects.push_back(Box);
+        scene->objects.push_back(Box2);
+
+
+
+        scene->gravity.y = -5.811f;
     }
     void dispose_scene(worldScene* scene)
     {
@@ -263,23 +284,25 @@ namespace PakkiPhysics
 		for(uint32_t i = 0; i < scene.objects.get_size();i++)
 		{
 			object* currentobj = scene.objects.data[i];
-			if(currentobj->t == type::simulateObj)
-			{
-                if(k->arrowU)
+            if (currentobj == player)
+            {
+                if (k->arrowU)
                 {
-                    currentobj->m.velocity.y += 4.f * dt;
+                    currentobj->m.velocity.y += 15.f*dt ;
                 }
                 if (k->arrowL)
                 {
-                    currentobj->m.velocity.x -= 4.f * dt;
+                    currentobj->m.velocity.x -= 15.f *dt;
                 }
                 if (k->arrowR)
                 {
-                    currentobj->m.velocity.x += 4.f * dt;
+                    currentobj->m.velocity.x += 15.f*dt ;
                 }
-
-                currentobj->m.velocity.x += scene.gravity.x * dt;
-                currentobj->m.velocity.y += scene.gravity.y * dt;
+            }
+            if(currentobj->t == type::simulateObj)
+            {
+                currentobj->m.velocity.x += scene.gravity.x *dt;
+                currentobj->m.velocity.y += scene.gravity.y *dt;
 				currentobj->pos = vec2{ currentobj->m.velocity.x + currentobj->pos.x , currentobj->m.velocity.y + currentobj->pos.y };
 			}
 		}
@@ -290,8 +313,12 @@ namespace PakkiPhysics
 		}
 
 		dynamicArray<collisionTable> collisiontable;
+        dynamicArray<collisionTable> hardcollisiontable;
+
 		dynamicArray<object*> collisionbuffer;
         collisionbuffer.init_array();
+        hardcollisiontable.init_array();
+
         collisiontable.init_array();
 		for(uint32_t i = 0; i < scene.objects.get_size();i++)
 		{
@@ -305,9 +332,19 @@ namespace PakkiPhysics
 				if (AABB(currentobj,collider))//collides
 				{
 					bool insert = true;
-					for (uint32_t jj = 0; jj < collisiontable.get_size(); jj++)
+                    dynamicArray<collisionTable>*  mytable;
+                    if (collider->t == type::staticObj || currentobj->t == type::staticObj)
+                    {
+                        mytable = &hardcollisiontable;
+                    }
+                    else
+                    {
+                        mytable = &collisiontable;
+                    }
+
+					for (uint32_t jj = 0; jj < mytable->get_size(); jj++)
 					{
-						if (collisiontable.data[jj].obj1 == currentobj && collider == collisiontable.data[jj].obj2)
+						if (mytable->data[jj].obj1 == currentobj && collider == mytable->data[jj].obj2)
 						{
 							insert = false;
 							break;
@@ -315,9 +352,9 @@ namespace PakkiPhysics
 					}
 					if (insert)
 					{
-						collisionTable* t = collisiontable.get_new_item();
-						t->obj1 = collider;
-						t->obj2 = currentobj;
+                            collisionTable* t = mytable->get_new_item();
+                            t->obj1 = collider;
+                            t->obj2 = currentobj;
 					}
 				}
 			}
@@ -325,74 +362,81 @@ namespace PakkiPhysics
 		}
 		clear_tree(scene.treeAllocator);
 		collisionbuffer.dispose_array();
-		//**handle collisions**//
-		for(uint32_t i = 0; i < scene.objects.get_size();i++)
-		{
+        //**new implementation**//
+        for(uint32_t i = 0; i < collisiontable.get_size();i++)
+        {
+            object* currentobject = collisiontable.data[i].obj1;
+            object* collider = collisiontable.data[i].obj2;         
 
-			object* currentobject = scene.objects.data[i];
-			for(uint32_t j = 0; j < collisiontable.get_size();j++)
-			{
-				collisionTable* currentTable = &collisiontable.data[j];
-				if(currentTable->obj1 == currentobject ||currentTable->obj2 == currentobject)
-				{
-					object* collider = currentTable->obj1 == currentobject ? currentTable->obj2 : currentTable->obj1;
-					if (currentobject->t == type::simulateObj)
-					{
-						if(collider->t == type::staticObj)
-						{
-			            
-							vec2 supportforce{ 0 };
-                            supportforce = abs(collider->pos.x - currentobject->pos.x) > abs(collider->pos.y - currentobject->pos.y) ? vec2{collider->pos.x - currentobject->pos.x + currentobject->dim.x + collider->dim.x,
-                               0} : vec2{0, collider->pos.y - currentobject->pos.y + currentobject->dim.y + collider->dim.y };
+            float collVel = sqrt(collider->m.velocity.x *collider->m.velocity.x + collider->m.velocity.y*collider->m.velocity.y);
+            float currVel = sqrt(currentobject->m.velocity.x *currentobject->m.velocity.x + currentobject->m.velocity.y*currentobject->m.velocity.y);
 
 
-							//suppF.x = collider->pos.x - currentobject->pos.x;
-							//suppF.y = collider->pos.y - currentobject->pos.y;
-							//vec2 addOn = abs(suppF.x) > abs(suppF.y/*collider->dim.x + currentobject->dim.x)*/) ? vec2{ collider->dim.x + currentobject->dim.x , 0 } :
-							//	vec2{ 0 ,  collider->dim.y + currentobject->dim.y };
+            if (collVel > currVel)
+            {
+                std::swap(currentobject, collider);
+            }
 
-							//supportforce.x += suppF.x;
-							//supportforce.y += suppF.y;
-
-                            currentobject->pos.x += supportforce.x;
-                            currentobject->pos.y += supportforce.y;
-
-
-                            float velLenght = sqrt(currentobject->m.velocity.x * currentobject->m.velocity.x + currentobject->m.velocity.y * currentobject->m.velocity.y);
-                            float supplenght = sqrt(supportforce.x * supportforce.x + supportforce.y * supportforce.y);
-                            supportforce = supplenght == 0 ? vec2{ 0 } : vec2{ (supportforce.x / supplenght)* velLenght,(supportforce.y / supplenght) * velLenght };
-
-                            currentobject->m.velocity.x += supportforce.x;
-                            currentobject->m.velocity.y += supportforce.y;
+            //**curren id always moved acording to how much inside its*//
+            float dimensionalX = collider->pos.x - currentobject->pos.x >= 0 ? (currentobject->dim.x + collider->dim.x)*-1 : currentobject->dim.x + collider->dim.x;
+            float dimensionalY = collider->pos.y - currentobject->pos.y >= 0 ? (currentobject->dim.y + collider->dim.y)*-1 : currentobject->dim.y + collider->dim.y;
+            vec2 supportforce = abs(collider->pos.x - currentobject->pos.x) > abs(collider->pos.y - currentobject->pos.y) ? vec2{ collider->pos.x - currentobject->pos.x + dimensionalX,
+                0 } : vec2{ 0, collider->pos.y - currentobject->pos.y + dimensionalY };
 
 
-						}
-						else if(collider->t == type::simulateObj) // todo
-						{
-						
-						}
-					}
-					else if (currentobject->t == type::staticObj)// no need for this?
-					{
+            currentobject->pos.x += supportforce.x;
+            currentobject->pos.y += supportforce.y;
 
-					}
-				}
-			}
 
-			//if (currentobject->t == type::simulateObj)
-			//{
-   //              //support force
-			//	currentobject->pos.x += supportforce.x;
-			//	currentobject->pos.y += supportforce.y;
+            vec2 newColliderSpeed = abs(currentobject->pos.x - collider->pos.x) > abs(currentobject->pos.y - collider->pos.y) ? vec2{ currentobject->m.velocity.x / collider->m.mass,0 } :
+                vec2{ 0 , currentobject->m.velocity.y / collider->m.mass };
 
- 
-			//	//tee yksikkö vectori
-			//	
-   //             int reeee = 10;
-			//}
 
-		}
+
+            vec2 newCUrrenVel = abs(currentobject->pos.x - collider->pos.x) > abs(currentobject->pos.y - collider->pos.y) ? vec2{ collider->m.velocity.x / currentobject->m.mass ,0 } :
+                vec2{ 0 , collider->m.velocity.y / currentobject->m.mass };
+
+
+
+            collider->m.velocity = newColliderSpeed;
+            currentobject->m.velocity = newCUrrenVel;
+        }
+		
+        for(uint32_t i = 0; i < hardcollisiontable.get_size();i++)
+        {
+            object* currentobject = hardcollisiontable.data[i].obj1;
+            object* collider = hardcollisiontable.data[i].obj2;
+
+            if (currentobject->t == type::staticObj && collider->t == type::simulateObj)
+            {
+                std::swap(currentobject, collider);
+            }
+
+            if(currentobject->t == type::simulateObj)
+            {
+                float dimensionalX = collider->pos.x - currentobject->pos.x >= 0 ? (currentobject->dim.x + collider->dim.x)*-1 : currentobject->dim.x + collider->dim.x;
+                float dimensionalY = collider->pos.y - currentobject->pos.y >= 0 ? (currentobject->dim.y + collider->dim.y)*-1 : currentobject->dim.y + collider->dim.y;
+                vec2 supportforce = abs(collider->pos.x - currentobject->pos.x) > abs(collider->pos.y - currentobject->pos.y) ? vec2{ collider->pos.x - currentobject->pos.x + dimensionalX,
+                    0 } : vec2{ 0, collider->pos.y - currentobject->pos.y + dimensionalY };
+
+
+
+                currentobject->pos.x += supportforce.x;
+                currentobject->pos.y += supportforce.y;
+                currentobject->m.velocity.x += supportforce.x;
+                currentobject->m.velocity.y += supportforce.y;
+
+                currentobject->m.velocity.x *= collider->s.friction;
+                currentobject->m.velocity.y *= collider->s.friction;
+            }
+        }
+
+        
+        
+        
+     
 		collisiontable.dispose_array();
+        hardcollisiontable.dispose_array();
         object** ite = scene.objects.data;
         (*ite)->dim;
 	}
