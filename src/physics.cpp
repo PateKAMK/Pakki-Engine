@@ -12,7 +12,8 @@ namespace PakkiPhysics
 	enum class type
 	{
 		simulateObj,
-		staticObj
+		staticObj,
+        hitBoxT
 	};
 	struct simulated
 	{
@@ -26,6 +27,10 @@ namespace PakkiPhysics
 	{
 		float friction;
 	};
+    struct  hitBox
+    {
+        dynamicArray<object*> insideMe;
+    };
 
 	struct object
 	{
@@ -222,7 +227,7 @@ namespace PakkiPhysics
         Box->dim = vec2{ 5,5 };
         Box->pos = vec2{ 100,180 };
         Box->t = type::simulateObj;
-        Box->m.mass = 1;
+        Box->m.mass = 1.0f;
         Box->m.velocity = vec2{ 0,0 };
         Box->m.currentfriction = vec2{ 1,1 };
         player = Box;
