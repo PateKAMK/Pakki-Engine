@@ -17,7 +17,9 @@ namespace PakkiPhysics
 	struct simulated
 	{
 		vec2 velocity;
+        vec2 currentfriction;
 		float mass;
+        vec2 oldPos;
 	};
 
 	struct Static
@@ -214,7 +216,7 @@ namespace PakkiPhysics
         Terrain->pos = vec2{ 100,100 };
         Terrain->dim = vec2{ 30,30 };
         Terrain->t = type::staticObj;
-        Terrain->s.friction = 0.90f;
+        Terrain->s.friction = 0.9f;
 
 
         Box->dim = vec2{ 5,5 };
@@ -222,39 +224,63 @@ namespace PakkiPhysics
         Box->t = type::simulateObj;
         Box->m.mass = 1;
         Box->m.velocity = vec2{ 0,0 };
+        Box->m.currentfriction = vec2{ 1,1 };
         player = Box;
 
         object* Box2 = scene->objectAllocator.new_item();
         Box2->dim = vec2{ 5,5 };
         Box2->pos = vec2{ 100 ,180  + 20};
         Box2->t = type::simulateObj;
-        Box2->m.mass = 0.5f;
-        Box2->m.velocity = vec2{ 0,0 };
+        Box2->m.mass = 1.0f;
+        Box2->m.velocity = vec2{ 0 };
+        Box2->m.currentfriction = vec2{ 1,1 };
+
+        object* Box3 = scene->objectAllocator.new_item();
+        Box3->dim = vec2{ 5,5 };
+        Box3->pos = vec2{ 100 ,180 + 20 + 20 };
+        Box3->t = type::simulateObj;
+        Box3->m.mass = 1.0f;
+        Box3->m.velocity = vec2{ 0 };
+        Box3->m.currentfriction = vec2{ 1,1 };
 
 
         object* Terrain2 = scene->objectAllocator.new_item();
-        Terrain2->pos = vec2{ 100 - 60,100+ 60 };
+        Terrain2->pos = vec2{ 100 - 60,100 };
         Terrain2->dim = vec2{ 30,30 };
         Terrain2->t = type::staticObj;
-        Terrain2->s.friction = 0.90f;
+        Terrain2->s.friction = 0.9f;
 
 
         object* Terrain3 = scene->objectAllocator.new_item();
-        Terrain3->pos = vec2{ 100 + 60,100 + 60 };
+        Terrain3->pos = vec2{ 100 + 60,100 };
         Terrain3->dim = vec2{ 30,30 };
         Terrain3->t = type::staticObj;
-        Terrain3->s.friction = 0.90f;
+        Terrain3->s.friction = 0.9f;
+
+
+        object* Terrain4 = scene->objectAllocator.new_item();
+        Terrain4->pos = vec2{ 100 + 60 + 60,100 + 3 };
+        Terrain4->dim = vec2{ 30,30 };
+        Terrain4->t = type::staticObj;
+        Terrain4->s.friction = 0.9f;
+
+        object* Terrain5 = scene->objectAllocator.new_item();
+        Terrain5->pos = vec2{ 100 - 60 - 60,100 + 3 };
+        Terrain5->dim = vec2{ 30,30 };
+        Terrain5->t = type::staticObj;
+        Terrain5->s.friction = 0.9f;
 
 
         scene->objects.push_back(Terrain);
         scene->objects.push_back(Terrain2);
         scene->objects.push_back(Terrain3);
+        scene->objects.push_back(Terrain4);
+        scene->objects.push_back(Terrain5);
         scene->objects.push_back(Box);
         scene->objects.push_back(Box2);
+        scene->objects.push_back(Box3);
 
-
-
-        scene->gravity.y = -5.811f;
+        scene->gravity.y = -9.811f;
     }
     void dispose_scene(worldScene* scene)
     {
@@ -288,22 +314,31 @@ namespace PakkiPhysics
             {
                 if (k->arrowU)
                 {
-                    currentobj->m.velocity.y += 15.f*dt ;
+                    currentobj->m.velocity.y += 15.f ;
                 }
                 if (k->arrowL)
                 {
-                    currentobj->m.velocity.x -= 15.f *dt;
+                    currentobj->m.velocity.x -= 15.f;
                 }
                 if (k->arrowR)
                 {
-                    currentobj->m.velocity.x += 15.f*dt ;
+                    currentobj->m.velocity.x += 15.f ;
                 }
             }
             if(currentobj->t == type::simulateObj)
             {
-                currentobj->m.velocity.x += scene.gravity.x *dt;
-                currentobj->m.velocity.y += scene.gravity.y *dt;
-				currentobj->pos = vec2{ currentobj->m.velocity.x + currentobj->pos.x , currentobj->m.velocity.y + currentobj->pos.y };
+                currentobj->m.velocity.x += scene.gravity.x;
+                currentobj->m.velocity.y += scene.gravity.y;
+                if(currentobj->m.currentfriction.x * currentobj->m.currentfriction.y != 1)
+                {
+                    int a = 0;
+                }
+                currentobj->m.velocity.x *= currentobj->m.currentfriction.x;
+                currentobj->m.velocity.y *= currentobj->m.currentfriction.y;
+                currentobj->m.oldPos = currentobj->pos;
+				currentobj->pos = vec2{ (currentobj->m.velocity.x *dt + currentobj->pos.x) ,
+                    (currentobj->m.velocity.y *dt + currentobj->pos.y )};
+                currentobj->m.currentfriction = vec2{ 1, 1 };
 			}
 		}
 		scene.treeAllocatorSize = 1;
@@ -368,38 +403,35 @@ namespace PakkiPhysics
             object* currentobject = collisiontable.data[i].obj1;
             object* collider = collisiontable.data[i].obj2;         
 
-            float collVel = sqrt(collider->m.velocity.x *collider->m.velocity.x + collider->m.velocity.y*collider->m.velocity.y);
-            float currVel = sqrt(currentobject->m.velocity.x *currentobject->m.velocity.x + currentobject->m.velocity.y*currentobject->m.velocity.y);
 
 
-            if (collVel > currVel)
+            //**from which side they are colliding**//
+            bool xside = abs(collider->m.oldPos.x - currentobject->m.oldPos.x) >= abs(collider->m.oldPos.y - currentobject->m.oldPos.y);
+
+            if(xside)
             {
-                std::swap(currentobject, collider);
+                //**calculate max distance for higher speed**//
+                object* speedier = abs(collider->m.velocity.x) > abs(currentobject->m.velocity.x) ? collider : currentobject;
+                object* slower = speedier == collider ? currentobject : collider;
+                int dimS = (slower->pos.x - speedier->pos.x <= 0 ? 1 : -1);
+                speedier->pos.x = (slower->dim.x + speedier->dim.x) * dimS  + slower->pos.x;
+                float tempSpeed = speedier->m.velocity.x;
+                speedier->m.velocity.x = slower->m.velocity.x / speedier->m.mass;
+                slower->m.velocity.x = tempSpeed / slower->m.mass;
+         
             }
-
-            //**curren id always moved acording to how much inside its*//
-            float dimensionalX = collider->pos.x - currentobject->pos.x >= 0 ? (currentobject->dim.x + collider->dim.x)*-1 : currentobject->dim.x + collider->dim.x;
-            float dimensionalY = collider->pos.y - currentobject->pos.y >= 0 ? (currentobject->dim.y + collider->dim.y)*-1 : currentobject->dim.y + collider->dim.y;
-            vec2 supportforce = abs(collider->pos.x - currentobject->pos.x) > abs(collider->pos.y - currentobject->pos.y) ? vec2{ collider->pos.x - currentobject->pos.x + dimensionalX,
-                0 } : vec2{ 0, collider->pos.y - currentobject->pos.y + dimensionalY };
-
-
-            currentobject->pos.x += supportforce.x;
-            currentobject->pos.y += supportforce.y;
-
-
-            vec2 newColliderSpeed = abs(currentobject->pos.x - collider->pos.x) > abs(currentobject->pos.y - collider->pos.y) ? vec2{ currentobject->m.velocity.x / collider->m.mass,0 } :
-                vec2{ 0 , currentobject->m.velocity.y / collider->m.mass };
-
-
-
-            vec2 newCUrrenVel = abs(currentobject->pos.x - collider->pos.x) > abs(currentobject->pos.y - collider->pos.y) ? vec2{ collider->m.velocity.x / currentobject->m.mass ,0 } :
-                vec2{ 0 , collider->m.velocity.y / currentobject->m.mass };
-
-
-
-            collider->m.velocity = newColliderSpeed;
-            currentobject->m.velocity = newCUrrenVel;
+            else
+            {
+                //**calculate max distance for higher speed**//
+                object* speedier = abs(collider->m.velocity.y) > abs(currentobject->m.velocity.y) ? collider : currentobject;
+                object* slower = speedier == collider ? currentobject : collider;
+                int dimS = (slower->pos.y - speedier->pos.y <= 0 ? 1 : -1);
+                speedier->pos.y = (slower->dim.y + speedier->dim.y) * dimS + slower->pos.y;
+                float tempSpeed = speedier->m.velocity.y;
+                speedier->m.velocity.y = slower->m.velocity.y / speedier->m.mass;
+                slower->m.velocity.y = tempSpeed / slower->m.mass;
+          
+            }
         }
 		
         for(uint32_t i = 0; i < hardcollisiontable.get_size();i++)
@@ -414,27 +446,47 @@ namespace PakkiPhysics
 
             if(currentobject->t == type::simulateObj)
             {
-                float dimensionalX = collider->pos.x - currentobject->pos.x >= 0 ? (currentobject->dim.x + collider->dim.x)*-1 : currentobject->dim.x + collider->dim.x;
-                float dimensionalY = collider->pos.y - currentobject->pos.y >= 0 ? (currentobject->dim.y + collider->dim.y)*-1 : currentobject->dim.y + collider->dim.y;
-                vec2 supportforce = abs(collider->pos.x - currentobject->pos.x) > abs(collider->pos.y - currentobject->pos.y) ? vec2{ collider->pos.x - currentobject->pos.x + dimensionalX,
-                    0 } : vec2{ 0, collider->pos.y - currentobject->pos.y + dimensionalY };
+                bool xside = abs(collider->pos.x - currentobject->pos.x) > abs(collider->pos.y - currentobject->pos.y);
 
 
+                if(xside)
+                {
+                    int dimS = (collider->pos.x - currentobject->pos.x <= 0 ? 1 : -1);
+                    currentobject->pos.x = collider->pos.x + ((collider->dim.x + currentobject->dim.x)*dimS);
+                    if (dimS == 1)
+                    {
+                        currentobject->m.velocity.x = currentobject->m.velocity.x >= 0 ? currentobject->m.velocity.x : 0;
+                    }
+                    else
+                    {
+                        currentobject->m.velocity.x = currentobject->m.velocity.x <= 0 ? currentobject->m.velocity.x : 0;
+                    }
+                    vec2 newFriction = vec2{ 1,collider->s.friction };
 
-                currentobject->pos.x += supportforce.x;
-                currentobject->pos.y += supportforce.y;
-                currentobject->m.velocity.x += supportforce.x;
-                currentobject->m.velocity.y += supportforce.y;
-
-                currentobject->m.velocity.x *= collider->s.friction;
-                currentobject->m.velocity.y *= collider->s.friction;
+                    float newLenght = newFriction.x*newFriction.x + newFriction.y*newFriction.y;//collider->s.friction;
+                    float oldlenght = currentobject->m.currentfriction.x *currentobject->m.currentfriction.x + currentobject->m.currentfriction.y*currentobject->m.currentfriction.y;
+                    currentobject->m.currentfriction = newLenght <= oldlenght ? newFriction : currentobject->m.currentfriction;
+                }
+                else
+                {
+                    int dimS = (collider->pos.y - currentobject->pos.y <= 0 ? 1 : -1);
+                    currentobject->pos.y = collider->pos.y + ((collider->dim.y + currentobject->dim.y)*dimS);                   
+                    if(dimS == 1)
+                    {
+                        currentobject->m.velocity.y = currentobject->m.velocity.y >= 0 ? currentobject->m.velocity.y : 0;
+                    }
+                    else
+                    {
+                        currentobject->m.velocity.y = currentobject->m.velocity.y <= 0 ? currentobject->m.velocity.y : 0;
+                    }
+                    vec2 newFriction = vec2{ collider->s.friction,1 };
+                    float newLenght = newFriction.x*newFriction.x + newFriction.y*newFriction.y;//collider->s.friction;
+                    float oldlenght = currentobject->m.currentfriction.x *currentobject->m.currentfriction.x + currentobject->m.currentfriction.y*currentobject->m.currentfriction.y;
+                    currentobject->m.currentfriction = newLenght <= oldlenght ? newFriction : currentobject->m.currentfriction;
+                }
             }
         }
 
-        
-        
-        
-     
 		collisiontable.dispose_array();
         hardcollisiontable.dispose_array();
         object** ite = scene.objects.data;

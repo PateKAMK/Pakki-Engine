@@ -24,7 +24,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-
+static bool esc = false;
 static keys* k;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -42,6 +42,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		{
 			k->arrowU = true;
 		}
+        if(key == GLFW_KEY_ESCAPE)
+        {
+            esc = true;
+        }
 	}
 	if (action == GLFW_RELEASE)
 	{
@@ -58,6 +62,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			k->arrowU = false;
 		}
 	}
+   
 }
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -159,6 +164,7 @@ int main(int argc,const char **argv)
 	bool debuglines = false;
 	while(!glfwWindowShouldClose(window))
 	{
+        if (esc) break;
 		glfwPollEvents();
 		static float volume = 0.1f;
 		static float pitch = 1.f;

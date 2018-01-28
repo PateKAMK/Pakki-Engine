@@ -135,10 +135,13 @@ public:
 	pool() :_currentArraySize(0) {}
 	~pool()
 	{
-		for (uint32_t i = 0; i < _data.get_size(); i++)
-		{
-			if(_data.data[i])free(_data.data[i]);
-		}
+        if(_data.data)
+        {      
+            for (uint32_t i = 0; i < _data.get_size(); i++)
+            {
+                if (_data.data[i])free(_data.data[i]);
+            }
+        }
 	}
 	void init_pool()
 	{
