@@ -41,6 +41,7 @@ namespace PakkiPhysics
 		{
 			simulated	m;
 			Static		s;
+			hitBox		h;
 		};
 	};
 	struct collisionTable
@@ -221,7 +222,7 @@ namespace PakkiPhysics
         Terrain->pos = vec2{ 100,100 };
         Terrain->dim = vec2{ 30,30 };
         Terrain->t = type::staticObj;
-        Terrain->s.friction = 0.9f;
+        Terrain->s.friction = 0.85f;
 
 
         Box->dim = vec2{ 5,5 };
@@ -253,28 +254,33 @@ namespace PakkiPhysics
         Terrain2->pos = vec2{ 100 - 60,100 };
         Terrain2->dim = vec2{ 30,30 };
         Terrain2->t = type::staticObj;
-        Terrain2->s.friction = 0.9f;
+        Terrain2->s.friction = 0.85f;
 
 
         object* Terrain3 = scene->objectAllocator.new_item();
         Terrain3->pos = vec2{ 100 + 60,100 };
         Terrain3->dim = vec2{ 30,30 };
         Terrain3->t = type::staticObj;
-        Terrain3->s.friction = 0.9f;
+        Terrain3->s.friction = 0.85f;
 
 
         object* Terrain4 = scene->objectAllocator.new_item();
         Terrain4->pos = vec2{ 100 + 60 + 60,100 + 3 };
         Terrain4->dim = vec2{ 30,30 };
         Terrain4->t = type::staticObj;
-        Terrain4->s.friction = 0.9f;
+        Terrain4->s.friction = 0.85f;
 
         object* Terrain5 = scene->objectAllocator.new_item();
         Terrain5->pos = vec2{ 100 - 60 - 60,100 + 3 };
         Terrain5->dim = vec2{ 30,30 };
         Terrain5->t = type::staticObj;
-        Terrain5->s.friction = 0.9f;
+        Terrain5->s.friction = 0.85f;
 
+		object* hitter = scene->objectAllocator.new_item();
+		hitter->pos = vec2{ 100 - 60 - 60,100 + 3 + 60 };
+		hitter->dim = vec2{ 30,30 };
+		hitter->t = type::hitBoxT;
+		hitter->h.insideMe.init_array();
 
         scene->objects.push_back(Terrain);
         scene->objects.push_back(Terrain2);
@@ -284,6 +290,7 @@ namespace PakkiPhysics
         scene->objects.push_back(Box);
         scene->objects.push_back(Box2);
         scene->objects.push_back(Box3);
+		scene->objects.push_back(hitter);
 
         scene->gravity.y = -9.811f;
     }
@@ -319,7 +326,7 @@ namespace PakkiPhysics
             {
                 if (k->arrowU)
                 {
-                    currentobj->m.velocity.y += 15.f ;
+                    currentobj->m.velocity.y += 25.f ;
                 }
                 if (k->arrowL)
                 {
@@ -344,6 +351,15 @@ namespace PakkiPhysics
 				currentobj->pos = vec2{ (currentobj->m.velocity.x *dt + currentobj->pos.x) ,
                     (currentobj->m.velocity.y *dt + currentobj->pos.y )};
                 currentobj->m.currentfriction = vec2{ 1, 1 };
+			}
+			else if(currentobj->t == type::hitBoxT)
+			{
+				for(uint32_t r = 0; r < currentobj->h.insideMe.get_size(); r ++)
+				{
+					if (currentobj->h.insideMe.data[r]->t == type::simulateObj)
+						currentobj->h.insideMe.data[r]->m.velocity.y += 15.f;
+				}
+				currentobj->h.insideMe.clear_array();
 			}
 		}
 		scene.treeAllocatorSize = 1;
@@ -377,6 +393,13 @@ namespace PakkiPhysics
                     {
                         mytable = &hardcollisiontable;
                     }
+					else if(collider->t == type::hitBoxT || currentobj->t == type::hitBoxT)
+					{
+						currentobj = currentobj->t == type::hitBoxT ? currentobj : collider;
+						object** pt = currentobj->h.insideMe.get_new_item();
+						*pt = collider;
+						continue;
+					}
                     else
                     {
                         mytable = &collisiontable;
@@ -422,8 +445,7 @@ namespace PakkiPhysics
                 speedier->pos.x = (slower->dim.x + speedier->dim.x) * dimS  + slower->pos.x;
                 float tempSpeed = speedier->m.velocity.x;
                 speedier->m.velocity.x = slower->m.velocity.x / speedier->m.mass;
-                slower->m.velocity.x = tempSpeed / slower->m.mass;
-         
+                slower->m.velocity.x = tempSpeed / slower->m.mass;        
             }
             else
             {
@@ -434,8 +456,7 @@ namespace PakkiPhysics
                 speedier->pos.y = (slower->dim.y + speedier->dim.y) * dimS + slower->pos.y;
                 float tempSpeed = speedier->m.velocity.y;
                 speedier->m.velocity.y = slower->m.velocity.y / speedier->m.mass;
-                slower->m.velocity.y = tempSpeed / slower->m.mass;
-          
+                slower->m.velocity.y = tempSpeed / slower->m.mass;     
             }
         }
 		
@@ -501,6 +522,7 @@ namespace PakkiPhysics
     {
         for (object** iterator = scene->objects.data; iterator != scene->objects.get_back() + 1; iterator++)
         {
+			if ((*iterator)->t == type::hitBoxT) continue;
             glm::vec4 destRec;
             destRec.x = (*iterator)->pos.x - (*iterator)->dim.x;
             destRec.y = (*iterator)->pos.y - (*iterator)->dim.y;
