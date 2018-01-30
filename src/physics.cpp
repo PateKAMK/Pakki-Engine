@@ -4,6 +4,8 @@
 #include <glm\glm\common.hpp>
 #include <Texture.h>
 #include <engine.h>
+#include<InputManager.h>
+#include <glfw3.h>
 
 namespace PakkiPhysics
 {
@@ -324,15 +326,15 @@ namespace PakkiPhysics
 			object* currentobj = scene.objects.data[i];
             if (currentobj == player)
             {
-                if (k->arrowU)
+                if (is_key_pressed(GLFW_KEY_W))
                 {
-                    currentobj->m.velocity.y += 25.f ;
+                    currentobj->m.velocity.y += 165.f ;
                 }
-                if (k->arrowL)
+                if (is_key_active(GLFW_KEY_A))
                 {
                     currentobj->m.velocity.x -= 15.f;
                 }
-                if (k->arrowR)
+                if (is_key_active(GLFW_KEY_D))
                 {
                     currentobj->m.velocity.x += 15.f ;
                 }

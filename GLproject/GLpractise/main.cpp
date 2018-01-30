@@ -28,7 +28,15 @@ static bool esc = false;
 static keys* k;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (action == GLFW_PRESS)
+	if(action == GLFW_PRESS)
+	{
+		set_key(key, true);
+	}
+	else if(action == GLFW_RELEASE)
+	{
+		set_key(key, false);
+	}
+	/*if (action == GLFW_PRESS)
 	{
 		if(key == GLFW_KEY_LEFT)
 		{
@@ -61,7 +69,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		{
 			k->arrowU = false;
 		}
-	}
+	}*/
    
 }
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
@@ -164,7 +172,7 @@ int main(int argc,const char **argv)
 	bool debuglines = false;
 	while(!glfwWindowShouldClose(window))
 	{
-        if (esc) break;
+        if (is_key_pressed(GLFW_KEY_ESCAPE)) break;
 		glfwPollEvents();
 		static float volume = 0.1f;
 		static float pitch = 1.f;
@@ -238,6 +246,7 @@ int main(int argc,const char **argv)
 			{
 				engine_events(&engine, dt,currentFps);
 			}
+			update_keys();
 		}
 
 //		glEnable(GL_SCISSOR_TEST);

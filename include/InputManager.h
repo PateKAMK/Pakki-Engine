@@ -17,13 +17,14 @@ enum class mouseButton
 void init_inputs();
 void update_keys();
 void dispose_inputs();
-void is_key_pressed(const uint32_t key);
-void is_key_active(const uint32_t key);
-void set_key(const uint32_t key);
-void set_mouse_button(const uint32_t mouse);
+bool is_key_pressed(const uint32_t key);
+bool is_key_active(const uint32_t key);
+void set_key(const uint32_t key,bool state);
+void set_mouse_button(const uint32_t mouse, const uint32_t action);
 void set_mouse_position(const double x, const double y);
 void get_mouse_pos(float* x, float* y);
-void is_mouse_pressed(mouseButton button);
+bool is_mouse_pressed(mouseButton button);
+bool is_mouse_active(mouseButton button);
 
 
 //class InputManager
