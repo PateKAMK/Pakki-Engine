@@ -171,7 +171,7 @@ namespace PakkiPhysics
 			while(i < node->objects.get_size())
 			{
 				int index = get_index(node, node->objects.data[i]->pos, node->objects.data[i]->dim);
-				if(index != 1)
+				if(index != -1)
 				{
 					insert_to_tree(&node->treebuffer[index], obj, allocator, allocatorsize);
 					node->objects.data[i] = NULL;
@@ -191,7 +191,7 @@ namespace PakkiPhysics
 		int index = get_index(node, obj->pos, obj->dim);
 		if(index != -1 && node->treebuffer != NULL)
 		{
-			get_collisions(node, buffer, obj);
+			get_collisions(&node->treebuffer[index], buffer, obj);
 		}
 		for(uint32_t i = 0; i < node->objects.get_size();i++)
 		{
@@ -204,6 +204,9 @@ namespace PakkiPhysics
 
     static uint32_t testID = 0;
     static object* player = NULL;
+	static object* b1 = NULL;
+	static object* b2 = NULL;
+
     void init_scene(worldScene* scene,vec2 worldCentrePos,vec2 worldDimensions, uint32_t texID)
     {
         constexpr uint32_t poolamount = 1 + 4 * 4 * 4;
@@ -242,6 +245,7 @@ namespace PakkiPhysics
         Box2->m.mass = 1.0f;
         Box2->m.velocity = vec2{ 0 };
         Box2->m.currentfriction = vec2{ 1,1 };
+		b1 = Box2;
 
         object* Box3 = scene->objectAllocator.new_item();
         Box3->dim = vec2{ 5,5 };
@@ -250,7 +254,7 @@ namespace PakkiPhysics
         Box3->m.mass = 1.0f;
         Box3->m.velocity = vec2{ 0 };
         Box3->m.currentfriction = vec2{ 1,1 };
-
+		b2 = Box3;
 
         object* Terrain2 = scene->objectAllocator.new_item();
         Terrain2->pos = vec2{ 100 - 60,100 };
@@ -292,7 +296,17 @@ namespace PakkiPhysics
         scene->objects.push_back(Box);
         scene->objects.push_back(Box2);
         scene->objects.push_back(Box3);
-		scene->objects.push_back(hitter);
+		//scene->objects.push_back(hitter);
+
+		for (uint32_t k = 0; k < 20; k++)
+		{
+			object* Terrain6 = scene->objectAllocator.new_item();
+			Terrain6->pos = vec2{ 100 - 60 - 60 - 60 *(float)k ,100 + 3 };
+			Terrain6->dim = vec2{ 30,30 };
+			Terrain6->t = type::staticObj;
+			Terrain6->s.friction = 0.85f;
+			scene->objects.push_back(Terrain6);
+		}
 
         scene->gravity.y = -9.811f;
     }
@@ -320,6 +334,10 @@ namespace PakkiPhysics
 	}
 	void update_objects(worldScene& scene,float dt, keys* k)
 	{
+		
+		//printf("pl :%d\n", player->t);
+		//printf("box1 :%d\n", b1->t);
+		//printf("bo2 :%d\n", b2->t);
 
 		for(uint32_t i = 0; i < scene.objects.get_size();i++)
 		{
@@ -390,7 +408,8 @@ namespace PakkiPhysics
 				if (AABB(currentobj,collider))//collides
 				{
 					bool insert = true;
-                    dynamicArray<collisionTable>*  mytable;
+                    dynamicArray<collisionTable>*  mytable = NULL;
+					if (collider->t == type::staticObj && currentobj->t == type::staticObj) continue;
                     if (collider->t == type::staticObj || currentobj->t == type::staticObj)
                     {
                         mytable = &hardcollisiontable;

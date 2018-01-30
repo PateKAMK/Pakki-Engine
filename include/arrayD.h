@@ -8,18 +8,17 @@ class dynamicArray final
 {
 public:
 	T*			data;
-private:
 	uint32_t	_allocated_size;
 	uint32_t	_size;
 
 public:
-	dynamicArray(uint32_t init_size = 10) : _size(0), _allocated_size(0), data(nullptr){};
+	dynamicArray() : _size(0), _allocated_size(0), data(nullptr){};
 	~dynamicArray()
 	{
 		if(data) free(data);
 	}
 
-	void init_array(uint32_t init_size = 10)
+	void init_array(const uint32_t init_size = 10)
 	{
 		_size = 0;
 		data = (T*)malloc(sizeof(T) * init_size);
@@ -30,7 +29,7 @@ public:
 		free(data);
 		data = NULL;
 	}
-	uint32_t get_size()
+	inline uint32_t get_size()
 	{
 		return _size;
 	}
@@ -73,7 +72,7 @@ public:
 	{
 		_size = 0;
 	}
-	void resize_array(uint32_t new_size)
+	void resize_array(const uint32_t new_size)
 	{
 		if (new_size > _allocated_size)
 		{
@@ -96,7 +95,7 @@ public:
 		}
 		return &data[_size++];
 	}
-	void fast_remove(uint32_t index)
+	void fast_remove(const uint32_t index)
 	{
 		assert(index < _size);
 		if(index == _size - 1) 
@@ -105,7 +104,7 @@ public:
 		}
 		else
 		{
-			data[index] = data[_size--];
+			data[index] = data[--_size];
 		}
 
 	}
@@ -126,8 +125,6 @@ template<typename T, const uint32_t poolSize = 50>
 class pool final
 {
 public:
-
-private:
 	uint32_t			_currentArraySize;
 	dynamicArray<T*>	_data;
 	dynamicArray<T*>	_freelist;
@@ -194,74 +191,3 @@ public:
 		return _data.get_size()* poolSize;
 	}
 };
-//
-//template<typename T>
-//struct dynArr
-//{
-//	T*			data;
-//	uint32_t	size;
-//	uint32_t	allocatedsize;
-//};
-//template<typename T>
-//void initDyArr(dynArr<T>* arr,uint32_t initsize = 10)
-//{
-//	arr->data = NULL;
-//	arr->size = 0;
-//	arr->allocatedsize = 0;
-//	arr->data = (T*)malloc(sizeof(T) * initsize);
-//	arr->allocatedsize = initsize;
-//}
-//
-//template<typename T>
-//T* get_next_item(dynArr<T>* arr)
-//{
-//	if (arr->allocatedsize == arr->size)
-//	{
-//		arr->allocatedsize *= 2;
-//		T* temp = arr->data;
-//		arr->data = (T*)realloc(arr->data, sizeof(T) *arr->allocatedsize);
-//		assert(data);
-//		if (!data)
-//		{
-//			arr->data = temp;
-//		}
-//	}
-//	return arr->data[arr->size++];
-//}
-//
-//template<typename T>
-//void dispose_array(dynArr<T>* arr)
-//{
-//	free(arr->data);
-//	memset(arr->data, 0, sizeof *arr);
-//}
-//template<typename T>
-//void free_array(dynArr<T>* arr)
-//{
-//	arr->size = 0;
-//}
-//
-//template<typename T>
-//struct memAllocator
-//{
-//	uint32_t			currentArraySize;
-//	dynamicArray<T*>	data;
-//	dynamicArray<T*>	freelist;
-//};
-//
-//template<typename T>
-//void init_memallocator(memAllocator<T>* p,uint32_t poolsize)
-//{
-//	initDyArr<T*>(p->data, 5);
-//	initDyArr<T*>(p->freelist, poolsize);
-//	T* d = (T*)malloc(sizeof(T) * poolsize);
-//	T* current = get_next_item<T*>(p->data);
-//	current = d;
-//}
-//
-//template<>
-
-//todo
-//checkkaa onko deletöity pointer valid?
-//get size palauttaa oikean koon vai max koon?
-

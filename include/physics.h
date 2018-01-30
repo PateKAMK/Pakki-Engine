@@ -18,8 +18,7 @@ namespace PakkiPhysics
 
 
     struct worldScene
-    {
-
+    { 
         pool<object>			objectAllocator;
         dynamicArray<object*>	objects;
         tree*					treeAllocator;
