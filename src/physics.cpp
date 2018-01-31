@@ -173,7 +173,7 @@ namespace PakkiPhysics
 				int index = get_index(node, node->objects.data[i]->pos, node->objects.data[i]->dim);
 				if(index != -1)
 				{
-					insert_to_tree(&node->treebuffer[index], obj, allocator, allocatorsize);
+					insert_to_tree(&node->treebuffer[index], node->objects.data[i], allocator, allocatorsize);
 					node->objects.data[i] = NULL;
 					node->objects.fast_remove(i);
 				}
@@ -227,10 +227,10 @@ namespace PakkiPhysics
         Terrain->pos = vec2{ 100,100 };
         Terrain->dim = vec2{ 30,30 };
         Terrain->t = type::staticObj;
-        Terrain->s.friction = 0.85f;
+        Terrain->s.friction = 0.95f;
 
 
-        Box->dim = vec2{ 5,5 };
+        Box->dim = vec2{ 10,10 };
         Box->pos = vec2{ 100,180 };
         Box->t = type::simulateObj;
         Box->m.mass = 1.0f;
@@ -239,7 +239,7 @@ namespace PakkiPhysics
         player = Box;
 
         object* Box2 = scene->objectAllocator.new_item();
-        Box2->dim = vec2{ 5,5 };
+        Box2->dim = vec2{ 10,10 };
         Box2->pos = vec2{ 100 ,180  + 20};
         Box2->t = type::simulateObj;
         Box2->m.mass = 1.0f;
@@ -248,7 +248,7 @@ namespace PakkiPhysics
 		b1 = Box2;
 
         object* Box3 = scene->objectAllocator.new_item();
-        Box3->dim = vec2{ 5,5 };
+        Box3->dim = vec2{ 10,10 };
         Box3->pos = vec2{ 100 ,180 + 20 + 20 };
         Box3->t = type::simulateObj;
         Box3->m.mass = 1.0f;
@@ -260,27 +260,27 @@ namespace PakkiPhysics
         Terrain2->pos = vec2{ 100 - 60,100 };
         Terrain2->dim = vec2{ 30,30 };
         Terrain2->t = type::staticObj;
-        Terrain2->s.friction = 0.85f;
+        Terrain2->s.friction = 0.95f;
 
 
         object* Terrain3 = scene->objectAllocator.new_item();
         Terrain3->pos = vec2{ 100 + 60,100 };
         Terrain3->dim = vec2{ 30,30 };
         Terrain3->t = type::staticObj;
-        Terrain3->s.friction = 0.85f;
+        Terrain3->s.friction = 0.95f;
 
 
         object* Terrain4 = scene->objectAllocator.new_item();
         Terrain4->pos = vec2{ 100 + 60 + 60,100 + 3 };
         Terrain4->dim = vec2{ 30,30 };
         Terrain4->t = type::staticObj;
-        Terrain4->s.friction = 0.85f;
+        Terrain4->s.friction = 0.95f;
 
         object* Terrain5 = scene->objectAllocator.new_item();
         Terrain5->pos = vec2{ 100 - 60 - 60,100 + 3 };
         Terrain5->dim = vec2{ 30,30 };
         Terrain5->t = type::staticObj;
-        Terrain5->s.friction = 0.85f;
+        Terrain5->s.friction = 0.95f;
 
 		object* hitter = scene->objectAllocator.new_item();
 		hitter->pos = vec2{ 100 - 60 - 60,100 + 3 + 60 };
@@ -296,17 +296,57 @@ namespace PakkiPhysics
         scene->objects.push_back(Box);
         scene->objects.push_back(Box2);
         scene->objects.push_back(Box3);
-		//scene->objects.push_back(hitter);
+		scene->objects.push_back(hitter);
 
-		for (uint32_t k = 0; k < 20; k++)
+		for (uint32_t k = 0; k < 10; k++)
 		{
 			object* Terrain6 = scene->objectAllocator.new_item();
 			Terrain6->pos = vec2{ 100 - 60 - 60 - 60 *(float)k ,100 + 3 };
 			Terrain6->dim = vec2{ 30,30 };
 			Terrain6->t = type::staticObj;
-			Terrain6->s.friction = 0.85f;
+			Terrain6->s.friction = 0.95f;
 			scene->objects.push_back(Terrain6);
 		}
+		for (uint32_t k = 0; k < 10; k++)
+		{
+			object* Terrain6 = scene->objectAllocator.new_item();
+			Terrain6->pos = vec2{ 100 + 60 + 60 + 60 * (float)k ,100 + 3 };
+			Terrain6->dim = vec2{ 30,30 };
+			Terrain6->t = type::staticObj;
+			Terrain6->s.friction = 0.95f;
+			scene->objects.push_back(Terrain6);
+		}
+		//for (uint32_t k = 0; k < 10; k++)
+		//{
+		//	object* Terrain6 = scene->objectAllocator.new_item();
+		//	Terrain6->pos = vec2{ 100 + 60 + 60 + 60 * 10 ,100 + 60*(float)k };
+		//	Terrain6->dim = vec2{ 30,30 };
+		//	Terrain6->t = type::staticObj;
+		//	Terrain6->s.friction = 0.85f;
+		//	scene->objects.push_back(Terrain6);
+		//}
+		//for (uint32_t k = 0; k < 10; k++)
+		//{
+		//	object* Terrain6 = scene->objectAllocator.new_item();
+		//	Terrain6->pos = vec2{ 100 - 60 - 60 - 60 * 10  ,100 + 60 * (float)k };
+		//	Terrain6->dim = vec2{ 30,30 };
+		//	Terrain6->t = type::staticObj;
+		//	Terrain6->s.friction = 0.85f;
+		//	scene->objects.push_back(Terrain6);
+		//}
+		for (uint32_t k = 0; k < 20; k++)
+		{
+			Box3 = scene->objectAllocator.new_item();
+			Box3->dim = vec2{ 10,10 };
+			Box3->pos = vec2{ 100+(float)k ,180 + 20 + 20 +(float)k };
+			Box3->t = type::simulateObj;
+			Box3->m.mass = 1.0f;
+			Box3->m.velocity = vec2{ 0 };
+			Box3->m.currentfriction = vec2{ 1,1 };
+			scene->objects.push_back(Box3);
+
+		}
+
 
         scene->gravity.y = -9.811f;
     }
@@ -346,7 +386,7 @@ namespace PakkiPhysics
             {
                 if (is_key_pressed(GLFW_KEY_W))
                 {
-                    currentobj->m.velocity.y += 165.f ;
+                    currentobj->m.velocity.y += 195.f ;
                 }
                 if (is_key_active(GLFW_KEY_A))
                 {
@@ -361,10 +401,6 @@ namespace PakkiPhysics
             {
                 currentobj->m.velocity.x += scene.gravity.x;
                 currentobj->m.velocity.y += scene.gravity.y;
-                if(currentobj->m.currentfriction.x * currentobj->m.currentfriction.y != 1)
-                {
-                    int a = 0;
-                }
                 currentobj->m.velocity.x *= currentobj->m.currentfriction.x;
                 currentobj->m.velocity.y *= currentobj->m.currentfriction.y;
                 currentobj->m.oldPos = currentobj->pos;
@@ -376,8 +412,8 @@ namespace PakkiPhysics
 			{
 				for(uint32_t r = 0; r < currentobj->h.insideMe.get_size(); r ++)
 				{
-					if (currentobj->h.insideMe.data[r]->t == type::simulateObj)
-						currentobj->h.insideMe.data[r]->m.velocity.y += 15.f;
+		/*			if (currentobj->h.insideMe.data[r]->t == type::simulateObj)
+						currentobj->h.insideMe.data[r]->m.velocity.y += 15.f;*/
 				}
 				currentobj->h.insideMe.clear_array();
 			}
@@ -416,8 +452,8 @@ namespace PakkiPhysics
                     }
 					else if(collider->t == type::hitBoxT || currentobj->t == type::hitBoxT)
 					{
-						currentobj = currentobj->t == type::hitBoxT ? currentobj : collider;
-						object** pt = currentobj->h.insideMe.get_new_item();
+						object* box = currentobj->t == type::hitBoxT ? currentobj : collider;
+						object** pt = box->h.insideMe.get_new_item();
 						*pt = collider;
 						continue;
 					}
@@ -455,7 +491,7 @@ namespace PakkiPhysics
 
 
             //**from which side they are colliding**//
-            bool xside = abs(collider->m.oldPos.x - currentobject->m.oldPos.x) >= abs(collider->m.oldPos.y - currentobject->m.oldPos.y);
+            bool xside = abs(collider->pos.x - currentobject->pos.x) >= abs(collider->pos.y - currentobject->pos.y);
 
             if(xside)
             {
@@ -545,8 +581,9 @@ namespace PakkiPhysics
         {
 			if ((*iterator)->t == type::hitBoxT) continue;
             glm::vec4 destRec;
-            destRec.x = (*iterator)->pos.x - (*iterator)->dim.x;
-            destRec.y = (*iterator)->pos.y - (*iterator)->dim.y;
+			glm::vec2 pos((int)(*iterator)->pos.x, (int)(*iterator)->pos.y);
+            destRec.x = (pos.x - (*iterator)->dim.x);
+            destRec.y = pos.y - (*iterator)->dim.y;
             destRec.z = (*iterator)->dim.x * 2;
             destRec.w = (*iterator)->dim.y * 2;
             glm::vec4 uv(0, 0, 1, 1);

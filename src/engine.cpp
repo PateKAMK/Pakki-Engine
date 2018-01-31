@@ -83,7 +83,7 @@ void engine_init(engine* engine,Camera* camera,Shader* shader)
 	init_entities(&engine->objects, engine,engine->drenderer);
 #else
     memset(&engine->scene, 0, sizeof(PakkiPhysics::worldScene));
-    PakkiPhysics::init_scene(&engine->scene, PakkiPhysics::vec2{ 100,100 }, PakkiPhysics::vec2{ 50,50 },FileSystem::load_sprite(laatikko,engine).ID);
+    PakkiPhysics::init_scene(&engine->scene, PakkiPhysics::vec2{ 100,100 }, PakkiPhysics::vec2{ 200,200 },FileSystem::load_sprite(laatikko,engine).ID);
 #endif // !OUT_OF_DATE
 	init_inputs();
 	LOGI("engine inited\n");
