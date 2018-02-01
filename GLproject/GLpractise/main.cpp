@@ -209,7 +209,7 @@ int main(int argc,const char **argv)
 		{
 			Pakki::window(&context, GEN_ID,Pakki::Window_No_Header);
 			Pakki::text(&context, "FPS %d", (int) currentFps);
-			Pakki::text(&context, "FrameTime %f", time[index]);
+			Pakki::text(&context, "FrameTime %f", time[index]*1000);
 			Pakki::text(&context, "NumDrawcalls %d",num_draw_calls);
 			Pakki::text(&context, "objects %d", 0);
 			Pakki::end_window(&context);

@@ -11,6 +11,11 @@ namespace PakkiPhysics
 {
 
 
+
+
+
+
+
 	enum class type
 	{
 		simulateObj,
