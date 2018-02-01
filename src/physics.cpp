@@ -1,6 +1,9 @@
+#include <physics.h>
+#ifndef OLD
+
+
 #include <algorithm>
 #include <new>
-#include <physics.h>
 #include <glm\glm\common.hpp>
 #include <Texture.h>
 #include <engine.h>
@@ -597,3 +600,4 @@ namespace PakkiPhysics
         }
     }
 }
+#endif // !

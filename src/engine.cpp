@@ -82,8 +82,8 @@ void engine_init(engine* engine,Camera* camera,Shader* shader)
 #ifndef OUT_OF_DATE
 	init_entities(&engine->objects, engine,engine->drenderer);
 #else
-    memset(&engine->scene, 0, sizeof(PakkiPhysics::worldScene));
-    PakkiPhysics::init_scene(&engine->scene, PakkiPhysics::vec2{ 100,100 }, PakkiPhysics::vec2{ 200,200 },FileSystem::load_sprite(laatikko,engine).ID);
+    //memset(&engine->scene, 0, sizeof(PakkiPhysics::worldScene));
+    //PakkiPhysics::init_scene(&engine->scene, PakkiPhysics::vec2{ 100,100 }, PakkiPhysics::vec2{ 200,200 },FileSystem::load_sprite(laatikko,engine).ID);
 #endif // !OUT_OF_DATE
 	init_inputs();
 	LOGI("engine inited\n");
@@ -130,11 +130,11 @@ void engine_events(engine* engine, double deltaTime, float fps)
 	update_objects(&engine->objects,&engine->key);
 	push_objects_to_batch(&engine->objects, engine->batch,engine->drenderer);
 #else
-    for(int i = 0; i < 1;i++)
+   /* for(int i = 0; i < 1;i++)
     {
         PakkiPhysics::update_objects(engine->scene, deltaTime / 1.f, &engine->key);
     }
-    PakkiPhysics::draw_objects(&engine->scene, engine->batch);
+    PakkiPhysics::draw_objects(&engine->scene, engine->batch);*/
 	Color c{ 255,255,255,255 };
 	draw_debug_box(engine->drenderer, &glm::vec4(100 - 60 - 60 - 30, 100 + 3 + 60 - 30, 30 + 30, 30 + 30),&c,0);
 #endif
@@ -156,7 +156,7 @@ void engine_clearup(engine* engine)
 	dispose_batch(engine->batch);
 	dispose_shader(engine->shader);
 	dispose_debug_renderer(engine->drenderer);
-    PakkiPhysics::dispose_scene(&engine->scene);
+    //PakkiPhysics::dispose_scene(&engine->scene);
 	dispose_inputs();
 
 	//dispose_fonts(engine->text);

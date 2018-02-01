@@ -30,7 +30,7 @@ struct engine {
 	Entities		objects;
 #endif // ! OUT_O
 #ifdef OUT_OF_DATE
-    PakkiPhysics::worldScene      scene;
+    //PakkiPhysics::worldScene      scene;
 #endif // OUT_OF_DATE
 	int				widht, height;
 	keys			key;

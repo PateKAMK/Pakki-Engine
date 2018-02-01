@@ -1,4 +1,8 @@
 #pragma once
+#define OLD
+#ifndef OLD
+
+
 #include "arrayD.h"
 #include <spritebatch.h>
 
@@ -35,3 +39,4 @@ namespace PakkiPhysics
     void draw_objects(worldScene* scene, SpriteBatch* batch);
     void dispose_scene(worldScene* scene);
 }
+#endif // !OLD

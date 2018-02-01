@@ -169,7 +169,7 @@ public:
 		if (_currentArraySize >= poolSize)
 		{
 			_currentArraySize = 0;
-			T* newdata = (T*)malloc(sizeof(T)* poolSize);
+			T* newdata = (T*)calloc(0,sizeof(T)* poolSize);
 			_data.push_back(newdata);
 		}
 		T** currentArray = _data.get_back();
