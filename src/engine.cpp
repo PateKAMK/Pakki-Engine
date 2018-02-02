@@ -148,7 +148,6 @@ void engine_events(engine* engine, double deltaTime, float fps)
 	sprintf(buf2, "x %.2f y %.2f", wpos.x, wpos.y);
 
 	update_camera(engine->camera);
-
 }
 
 void engine_clearup(engine* engine)

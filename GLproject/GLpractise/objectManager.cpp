@@ -1,6 +1,6 @@
 #include <arrayD.h>
 #include <algorithm>
-
+#include <spritebatch.h>
 namespace ObjectManager
 {
 	typedef uint32_t state;
@@ -10,18 +10,195 @@ namespace ObjectManager
 		float	x;
 		float	y;
 	};
-
+	struct vec4
+	{
+		float	x;
+		float	y;
+		float	z;
+		float	w;
+	};
+	struct drawdata
+	{
+		vec4		uv;
+		Color		color;
+		uint32_t	spriteid;
+		int			level;
+	};
 	struct object
 	{
-		vec2	pos;
-		vec2	dim;
-		state	s;
-		id		i;
+		vec2		pos;
+		vec2		dim;
+		state		s;
+		id			i;
+		drawdata*	drawPtr;
 	};
-	/*GRID*/
 
+	//GUADTREE
+#define USE_QUAD_TREE
+#ifdef  USE_QUAD_TREE
+
+#endif //  USE_QUAD_TREE
+#define MAX_TREELEVEL 4
+#define MAX_OBJECTAMOUNT 10
+	struct tree
+	{
+		unsigned int				level;
+		dynamicArray<object*>		objects;
+		tree*						treebuffer;
+		vec2						pos;
+		vec2						dim;
+	};
+
+	void create_new_node(tree* node, uint32_t level, const vec2& pos, const vec2& dim)
+	{
+		node->level = level;
+		node->pos = pos;
+		node->level = level;
+		node->dim = dim;
+		if (node->objects.data == NULL)
+		{
+			node->objects.init_array(20);
+		}
+	}
+	void clear_tree(tree* node)
+	{
+		if (node->treebuffer)
+		{
+			for (uint32_t i = 0; i < 4; i++)
+			{
+				clear_tree(&node->treebuffer[i]);
+			}
+		}
+		node->objects.clear_array();
+		node->treebuffer = NULL;
+	}
+	void split_tree(tree* node, tree* allocator, uint32_t* allocatorstart)
+	{
+		float subWidht = node->dim.x / 2;
+		float subHeight = node->dim.y / 2;
+
+		node->treebuffer = &allocator[*allocatorstart];
+		*allocatorstart += 4;
+
+		create_new_node(&node->treebuffer[0], node->level + 1,
+			vec2{ node->pos.x + subWidht,node->pos.y + subHeight },
+			vec2{ subWidht,subHeight });
+		create_new_node(&node->treebuffer[1], node->level + 1,
+			vec2{ node->pos.x - subWidht,node->pos.y + subHeight },
+			vec2{ subWidht,subHeight });
+		create_new_node(&node->treebuffer[2], node->level + 1,
+			vec2{ node->pos.x - subWidht,node->pos.y - subHeight },
+			vec2{ subWidht,subHeight });
+		create_new_node(&node->treebuffer[3], node->level + 1,
+			vec2{ node->pos.x + subWidht,node->pos.y - subHeight },
+			vec2{ subWidht,subHeight });
+	}
+
+	int get_index(tree* node, vec2 pos, vec2 dim)
+	{
+		int index = -1;
+
+		//if true it can fit to bottom place
+		bool bot = pos.y - dim.y  > node->pos.y - node->dim.y
+			&& pos.y + dim.y <  node->pos.y;
+		//if true it can fit to top place
+		bool top = pos.y - dim.y  > node->pos.y
+			&& pos.y + dim.y <  node->pos.y + node->dim.y;
+
+
+		if (pos.x - dim.x  > node->pos.x - node->dim.x
+			&& pos.x + dim.x <  node->pos.x)
+		{
+			if (top)
+			{
+				index = 1;
+			}
+			else if (bot)
+			{
+				index = 2;
+			}
+		}
+		else if (pos.x - dim.x  > node->pos.x
+			&& pos.x + dim.x <  node->pos.x + node->dim.x)
+		{
+			if (top)
+			{
+				index = 0;
+			}
+			else if (bot)
+			{
+				index = 3;
+			}
+		}
+		return index;
+	}
+
+	void insert_to_tree(tree* node, object* obj, tree* allocator, uint32_t* allocatorsize)
+	{
+		if (node->treebuffer)
+		{
+			int index = get_index(node, obj->pos, obj->dim);
+			if (index != -1)
+			{
+				insert_to_tree(&node->treebuffer[index], obj, allocator, allocatorsize);
+				return;
+			}
+		}
+		object** newObj = node->objects.get_new_item();
+		(*newObj) = obj;
+
+		if (node->objects.get_size() >= MAX_OBJECTAMOUNT && node->level < MAX_TREELEVEL)
+		{
+			if (node->treebuffer == NULL)
+			{
+				split_tree(node, allocator, allocatorsize);
+			}
+			int i = 0;
+			while (i < node->objects.get_size())
+			{
+				int index = get_index(node, node->objects.data[i]->pos, node->objects.data[i]->dim);
+				if (index != -1)
+				{
+					insert_to_tree(&node->treebuffer[index], node->objects.data[i], allocator, allocatorsize);
+					node->objects.data[i] = NULL;
+					node->objects.fast_remove(i);
+				}
+				else
+				{
+					i++;
+				}
+			}
+		}
+
+	}
+
+	void get_collisions(tree* node, dynamicArray<object*>* buffer, object* obj)
+	{
+		int index = get_index(node, obj->pos, obj->dim);
+		if (index != -1 && node->treebuffer != NULL)
+		{
+			get_collisions(&node->treebuffer[index], buffer, obj);
+		}
+		for (uint32_t i = 0; i < node->objects.get_size(); i++)
+		{
+			object** newobj = buffer->get_new_item();
+			*newobj = node->objects.data[i];
+		}
+	}
+
+
+
+
+	/*GRID*/
+#ifdef USE_GRIDS
 #define GRIDSIZE	10
 #define	GRIDAMOUNT		200
+	bool AABB(float x,float y,float d1,float d2, const object* obj1)
+	{
+		float disx = std::abs(obj1->pos.x - x);
+		float disY = std::abs(obj1->pos.y - y);
+		return disx < obj1->dim.x + d1 && disY < obj1->dim.y + d2;
+	}
 	struct gridNode
 	{
 		dynamicArray<object*> my_objects;			
@@ -71,12 +248,6 @@ namespace ObjectManager
 		}
 		object** e = gr->grids[myGridX][myGridY].my_objects.get_new_item();
 		*e = obj;
-	}
-	bool AABB(float x,float y,float d1,float d2, const object* obj1)
-	{
-		float disx = std::abs(obj1->pos.x - x);
-		float disY = std::abs(obj1->pos.y - y);
-		return disx < obj1->dim.x + d1 && disY < obj1->dim.y + d2;
 	}
 	void get_area_from_grid(grid* gr,dynamicArray<id> *buffer,const float x,const float y,const float d1,const float d2)
 	{
@@ -172,6 +343,7 @@ namespace ObjectManager
 			startX += GRIDSIZE;
 		}
 	}
+#endif //USE_GRID
 	/* OBJECTS */
 
 	enum objstate : state
@@ -199,44 +371,161 @@ namespace ObjectManager
 		*_id = *((id*)arptr);
 	}
 #define POOLSIZE 255
-
+	struct collisiontable
+	{
+		object* obj1;
+		object* obj2;
+	};
 	struct objects
 	{
-		pool<object, POOLSIZE>	objectPool;
-		grid					movableObjects;
-		grid					staticObjects;
-		vec2					worldMid;
-		vec2					worldDims;
+		pool<object, POOLSIZE>			objectPool;
+		tree							objTree;		
+		vec2							worldMid;
+		vec2							worldDims;
+		tree*							treeAllocator;
+		uint32_t						allocatorSize;
+		dynamicArray<collisiontable>	hardCollisionBuffer;//init
+		dynamicArray<collisiontable>	softCollisionBuffer;
+		dynamicArray<object*>			updateBuffer;
+		dynamicArray<object*>			generalcollisionBuffer;
+		dynamicArray<object*>			drawAbleOnes;
 	};
 	void init_objects(objects* objs,vec2 worldMid,vec2 dimensions)
 	{
 		memset(objs, 0, sizeof(objects));
+		constexpr uint32_t poolamount = 1 + 4 * 4 * 4;
+		objs->treeAllocator = (tree*)malloc(sizeof(tree) * poolamount);
+		objs->allocatorSize = 1;
 		objs->worldMid = worldMid;
 		objs->worldDims = dimensions;
 		objs->objectPool.init_pool();
-		objs->staticObjects.dimensions = dimensions;
-		objs->movableObjects.dimensions = dimensions;
-		objs->staticObjects.worldPos = worldMid;
-		objs->movableObjects.worldPos = worldMid;
+		create_new_node(&objs->objTree, 0, worldMid, dimensions);
+		objs->hardCollisionBuffer.init_array(50);
+		objs->softCollisionBuffer.init_array(50);
+		objs->updateBuffer.init_array(POOLSIZE);
+		objs->generalcollisionBuffer.init_array();
 	}
-	void update_objects(objects* objs)
+	bool AABB(const object* obj1, const object* obj2)
 	{
-		clear_grid(&objs->movableObjects);
+		float disx = std::abs(obj1->pos.x - obj2->pos.x);
+		float disY = std::abs(obj1->pos.y - obj2->pos.y);
+		return disx < obj1->dim.x + obj2->dim.y && disY < obj1->dim.y + obj2->dim.y;
+	}
+	void get_collisions_to_buffer(objects* objs)
+	{
+		clear_tree(&objs->objTree);
+		objs->updateBuffer.clear_array();
+		objs->drawAbleOnes.clear_array();
 		for(uint32_t i = 0; i < objs->objectPool._data._size; i++)
 		{
 			for(uint32_t j = 0; j < POOLSIZE;j++)
 			{
-				if((objs->objectPool._data.data[i])[j].i & objstate::Moving)
+				if ((objs->objectPool._data.data[i])[j].s == 0) continue;
+				if((objs->objectPool._data.data[i])[j].drawPtr != NULL)
 				{
-					insert_to_grid(&objs->movableObjects, &(objs->objectPool._data.data[i])[j]);
+					object** drawthis = objs->drawAbleOnes.get_new_item();
+					*drawthis = &(objs->objectPool._data.data[i])[j];
+				}
+				insert_to_tree(&objs->objTree, &(objs->objectPool._data.data[i])[j], objs->treeAllocator, &objs->allocatorSize);
+				if ((objs->objectPool._data.data[i])[j].s == objstate::Static) continue;
+				object** ptr = objs->updateBuffer.get_new_item();
+				*ptr = &(objs->objectPool._data.data[i])[j];
+			}
+		}
+		uint32_t size = objs->updateBuffer.get_size();
+		for(uint32_t i = 0; i < size;i++)
+		{
+			objs->generalcollisionBuffer.clear_array();
+			object* currenObject = objs->updateBuffer.data[i];
+			get_collisions(objs->treeAllocator, &objs->generalcollisionBuffer, objs->updateBuffer.data[i]);
+			for(uint32_t collInd = 0; collInd < objs->generalcollisionBuffer._size; collInd++)
+			{
+				object* collider = objs->generalcollisionBuffer.data[collInd];
+				if (collider == currenObject)continue;
+				if (!AABB(currenObject, collider))continue;
+				if(currenObject->s == objstate::Static || collider->s == objstate::Static)
+				{
+					if(currenObject->s != objstate::Moving)//swap
+					{
+						object* temp = currenObject;
+						currenObject = collider;
+						collider = currenObject;
+					}
+					bool insert = true;
+					for(uint32_t copyCheck = 0; copyCheck < objs->hardCollisionBuffer._size;copyCheck++)
+					{
+						if(currenObject == objs->hardCollisionBuffer.data[copyCheck].obj1 && collider == objs->hardCollisionBuffer.data[copyCheck].obj2)
+						{
+							insert = false;
+							break;
+						}
+					}
+					if(insert)
+					{
+						collisiontable* t = objs->hardCollisionBuffer.get_new_item();
+						t->obj1 = currenObject;
+						t->obj2 = collider;
+					}
+
+				}
+				else if(currenObject->s == objstate::Moving && collider->s == objstate::Moving)
+				{
+					bool insert = true;
+					for(uint32_t copyCheck = 0;copyCheck < objs->softCollisionBuffer._size;copyCheck++)
+					{
+						if (currenObject == objs->softCollisionBuffer.data[copyCheck].obj1 && collider == objs->softCollisionBuffer.data[copyCheck].obj2)
+						{
+							insert = false;
+							break;
+						}
+					}
+					if (insert)
+					{
+						collisiontable* t = objs->softCollisionBuffer.get_new_item();
+						t->obj1 = currenObject;
+						t->obj2 = collider;
+					}
+				}
+				else
+				{
+					assert(true);
 				}
 			}
 		}
+
 	}
 	void dispose_objects(objects* objs)
 	{
-		dispose_grid(&objs->movableObjects);
-		dispose_grid(&objs->staticObjects);
+		constexpr uint32_t poolamount = 1 + 4 * 4 * 4;
+		for (uint32_t i = 0; i < poolamount; i++)
+		{
+			if (objs->treeAllocator[i].objects.data)
+			{
+				objs->treeAllocator[i].objects.dispose_array();
+			}
+		}
+		free(objs->treeAllocator);
 		objs->objectPool.dispose_pool();
+		objs->hardCollisionBuffer.dispose_array();
+		objs->softCollisionBuffer.dispose_array();
+		objs->updateBuffer.dispose_array();
+		objs->generalcollisionBuffer.dispose_array();
 	}
+
+	void draw_objects(dynamicArray<object*>* drawObjs,SpriteBatch* batch)//korjaa glm pois
+	{
+		for(uint32_t i = 0; i < drawObjs->_size;i++)
+		{
+			assert(drawObjs->data[i]->drawPtr != NULL);
+			glm::vec4 destRec;
+			glm::vec2 pos((int)drawObjs->data[i]->pos.x, (int)drawObjs->data[i]->pos.y);
+			destRec.x = (pos.x - (int)drawObjs->data[i]->dim.x);
+			destRec.y = pos.y - (int)drawObjs->data[i]->dim.y;
+			destRec.z = (int)drawObjs->data[i]->dim.x * 2;
+			destRec.w = (int)drawObjs->data[i]->dim.y * 2;
+			glm::vec4 uv(drawObjs->data[i]->drawPtr->uv.x, drawObjs->data[i]->drawPtr->uv.y, drawObjs->data[i]->drawPtr->uv.z, drawObjs->data[i]->drawPtr->uv.w);
+			push_to_batch(batch, &destRec, &uv, drawObjs->data[i]->drawPtr->spriteid, &drawObjs->data[i]->drawPtr->color, drawObjs->data[i]->drawPtr->level, 0);
+		}
+	}
+
 }
