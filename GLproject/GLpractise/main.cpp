@@ -10,15 +10,15 @@
 #include <soundsystem.h>
 
 #include <pakki.h>
-
+#define SOL_CHECK_ARGUMENTS 1
+#include <sol.hpp>
 #define FILEID 10
-
+static input inputs;
 enum ret
 {
 	pass,
 	fail
 };
-static glm::vec2* mpos;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
@@ -30,51 +30,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
 	if(action == GLFW_PRESS)
 	{
-		set_key(key, true);
+		set_key(&inputs,key, true);
 	}
 	else if(action == GLFW_RELEASE)
 	{
-		set_key(key, false);
+		set_key(&inputs,key, false);
 	}
-	/*if (action == GLFW_PRESS)
-	{
-		if(key == GLFW_KEY_LEFT)
-		{
-			k->arrowL = true;
-		}
-		if (key == GLFW_KEY_RIGHT)
-		{
-			k->arrowR = true;
-		}		
-		if (key == GLFW_KEY_UP)
-		{
-			k->arrowU = true;
-		}
-        if(key == GLFW_KEY_ESCAPE)
-        {
-            esc = true;
-        }
-	}
-	if (action == GLFW_RELEASE)
-	{
-		if (key == GLFW_KEY_LEFT)
-		{
-			k->arrowL = false;
-		}
-		if (key == GLFW_KEY_RIGHT)
-		{
-			k->arrowR = false;
-		}
-		if (key == GLFW_KEY_UP)
-		{
-			k->arrowU = false;
-		}
-	}*/
-   
 }
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	*mpos = glm::vec2(xpos, ypos);
+	set_mouse_position(&inputs, xpos, ypos);
 }
 bool button = false;
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -91,22 +56,41 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		}
 	}
 }
-
+int deny(lua_State* L) {
+	return luaL_error(L, "Cant crete new entries to this table!");
+}
 int main(int argc,const char **argv)
 {
+	sol::state lua;
+	lua.open_libraries(sol::lib::base,
+		sol::lib::package, sol::lib::jit);
+	sol::table pakki_table = lua.create_named_table("Pakki");
+	sol::table meta = lua.create_table_with();
+	meta[sol::meta_function::new_index] = deny;
+	pakki_table.set("success", 1,
+		"fail",0);
+	pakki_table.set("MouseX", &inputs.xWorld,
+		"MouseY", &inputs.yWorld);
+	
+	lua.script_file("pakki.lua");
+	auto con = lua["configure"];
+	if(!con.valid())
+	{
+		printf("Please do configure table");
+		getchar();
+		return fail;
+	}
 	Pakki::PakkiContext context;
-	int w = 1200;
-	int h = 800;
+	
+	int w = con["ScreenX"];
+	int h = con["ScreenY"];
 	soundsystem::initsounds();
-	//ree.loadSound("Bag Raiders - Shooting Stars.mp3", 1);
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // get access to smaller subset of opengl features
 	GLFWwindow* window  = glfwCreateWindow(w, h, "Tabula rasa", NULL, NULL);
-	//int texture_units;
-	//glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &texture_units);
-	//printf("Texture units avaivable: %d", texture_units);
+
 	if (window == NULL)
 	{
 		LOGI("failed to initialize window");
@@ -138,7 +122,6 @@ int main(int argc,const char **argv)
 	Shader shader{ 0,0 };
 	engine engine;
 	memset(&engine, 0, sizeof(engine));
-	::mpos = &engine.mousePos;
 	SpriteBatch batch;
 	DebugRenderer drenderer;
 	engine.batch = &batch;
@@ -150,7 +133,7 @@ int main(int argc,const char **argv)
 	::k = &engine.key;
 	engine_init(&engine,&camera,&shader);
 	int num_draw_calls = 0;
-
+	init_inputs(&inputs);
 	init_pakki(&context, &engine,&num_draw_calls);
 	double t = 0.0;
 	constexpr double dt = 1.0 / 60.0;
@@ -170,15 +153,21 @@ int main(int argc,const char **argv)
 	int index = 0;
 	bool pause = true;
 	bool debuglines = false;
+	lua["initPakki"]();
+	auto luaUpdate = lua["updatePakki"];
+	bool stopgame = false;
 	while(!glfwWindowShouldClose(window))
 	{
-        if (is_key_pressed(GLFW_KEY_ESCAPE)) break;
+        if (is_key_pressed(&inputs,GLFW_KEY_ESCAPE) || stopgame) break;
 		glfwPollEvents();
+		glm::vec2 mWpos = point_to_world_position(engine.camera, &glm::vec2(inputs.xMouse, inputs.yMouse));
+		inputs.xWorld = mWpos.x;
+		inputs.yWorld = mWpos.y;
 		static float volume = 0.1f;
 		static float pitch = 1.f;
 		soundsystem::ss->update(pause, volume, pitch);
 		//LOGI("button %d\n", button);
-		start_frame(&context, engine.mousePos,button);
+		start_frame(&context,glm::vec2(inputs.xMouse,inputs.yMouse),button);
 		double newTime = glfwGetTime();
 		time[index++] = (float)newTime - lastTime;
 		if (index >= 10)index = 0;
@@ -244,21 +233,20 @@ int main(int argc,const char **argv)
 			t += dt;
 			if(!pause)
 			{
+				int suc = luaUpdate(dt);
+				if (!suc) stopgame = true;
 				engine_events(&engine, dt,currentFps);
 			}
-			update_keys();
+			update_keys(&inputs);
 		}
 
-//		glEnable(GL_SCISSOR_TEST);
-
-//		glScissor(300, 300, 300, 300);
 		num_draw_calls += engine_draw(&engine);
-//		glDisable(GL_SCISSOR_TEST);
 		Pakki::render(&context);
 		glfwSwapBuffers(window);
 
 	}
 	engine_clearup(&engine);
+	dispose_inputs(&inputs);
 	//clear up engine
 	glfwTerminate();
 	return pass;

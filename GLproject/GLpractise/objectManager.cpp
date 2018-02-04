@@ -153,7 +153,7 @@ namespace ObjectManager
 			{
 				split_tree(node, allocator, allocatorsize);
 			}
-			int i = 0;
+			uint32_t i = 0;
 			while (i < node->objects.get_size())
 			{
 				int index = get_index(node, node->objects.data[i]->pos, node->objects.data[i]->dim);
@@ -404,6 +404,7 @@ namespace ObjectManager
 		objs->softCollisionBuffer.init_array(50);
 		objs->updateBuffer.init_array(POOLSIZE);
 		objs->generalcollisionBuffer.init_array();
+		objs->drawAbleOnes.init_array(POOLSIZE);
 	}
 	bool AABB(const object* obj1, const object* obj2)
 	{
@@ -427,7 +428,7 @@ namespace ObjectManager
 					*drawthis = &(objs->objectPool._data.data[i])[j];
 				}
 				insert_to_tree(&objs->objTree, &(objs->objectPool._data.data[i])[j], objs->treeAllocator, &objs->allocatorSize);
-				if ((objs->objectPool._data.data[i])[j].s == objstate::Static) continue;
+				//if ((objs->objectPool._data.data[i])[j].s == objstate::Static) continue; this would be optimal but then we cannot be dure that everything collides
 				object** ptr = objs->updateBuffer.get_new_item();
 				*ptr = &(objs->objectPool._data.data[i])[j];
 			}
@@ -442,6 +443,7 @@ namespace ObjectManager
 			{
 				object* collider = objs->generalcollisionBuffer.data[collInd];
 				if (collider == currenObject)continue;
+				if (currenObject->s == objstate::Static && collider->s == objstate::Static)continue;
 				if (!AABB(currenObject, collider))continue;
 				if(currenObject->s == objstate::Static || collider->s == objstate::Static)
 				{
@@ -510,6 +512,7 @@ namespace ObjectManager
 		objs->softCollisionBuffer.dispose_array();
 		objs->updateBuffer.dispose_array();
 		objs->generalcollisionBuffer.dispose_array();
+		objs->drawAbleOnes.dispose_array();
 	}
 
 	void draw_objects(dynamicArray<object*>* drawObjs,SpriteBatch* batch)//korjaa glm pois

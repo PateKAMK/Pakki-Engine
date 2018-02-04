@@ -36,7 +36,7 @@ soundsystem::soundsystem():volume(0.1f),pitch(1.f)
     ERRCHECK(result);
 
 
-	result = fmodSystem->createSound("Bag Raiders - Shooting Stars.mp3", FMOD_2D, nullptr, &shoottingstarsound);
+	/*result = fmodSystem->createSound("Bag Raiders - Shooting Stars.mp3", FMOD_2D, nullptr, &shoottingstarsound);
 
 	result = fmodSystem->playSound(shoottingstarsound, nullptr, true, &shoottingstarchannel);
 	shoottingstarchannel->setVolume(volume);
@@ -45,7 +45,7 @@ soundsystem::soundsystem():volume(0.1f),pitch(1.f)
 	result = fmodSystem->createSound("WATER BLIPY 1.wav", FMOD_2D, nullptr, &bliby);
 
 
-	ERRCHECK(result);
+	ERRCHECK(result);*/
 }
 
 soundsystem::~soundsystem()
@@ -65,7 +65,7 @@ void soundsystem::update(bool pause,float nvolume, float npitch)
     result = fmodSystem->update();
     ERRCHECK(result);
 
-	bool playing = true;
+	/*bool playing = true;
 	result = shoottingstarchannel->isPlaying(&playing);
 	if(result == FMOD_ERR_INVALID_HANDLE)
 	{
@@ -102,7 +102,7 @@ void soundsystem::update(bool pause,float nvolume, float npitch)
 			pitch = npitch;
 			shoottingstarchannel->setPitch(pitch);
 		}
-	}
+	}*/
 }
 
 
@@ -121,20 +121,20 @@ void soundsystem::ERRCHECK_fn(FMOD_RESULT, const char *file, int line)
 
 void soundsystem::playSound(bool paused)
 {
-	FMOD::Channel* ch;
-    result = fmodSystem->playSound(bliby, nullptr, paused, &ch);
-	ch->setVolume(this->volume);
-	ch->setPitch(this->pitch);
-	//sound[sndID].
-    ERRCHECK(result);
+	//FMOD::Channel* ch;
+ //   result = fmodSystem->playSound(bliby, nullptr, paused, &ch);
+	//ch->setVolume(this->volume);
+	//ch->setPitch(this->pitch);
+	////sound[sndID].
+ //   ERRCHECK(result);
 }
 
 void soundsystem::loadSound(std::string path,int channelnum)
 {
     //result = fmodSystem->createSound(MediaPath(fileToLoad), FMOD_DEFAULT, nullptr, &sound[channelnum]);
-	result = fmodSystem->createSound(path.c_str(), FMOD_2D, nullptr, &sound[channelnum]);
+	/*result = fmodSystem->createSound(path.c_str(), FMOD_2D, nullptr, &sound[channelnum]);
 
-    ERRCHECK(result);
+    ERRCHECK(result);*/
 
 }
 

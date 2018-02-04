@@ -81,11 +81,7 @@ void engine_init(engine* engine,Camera* camera,Shader* shader)
 	//init_fonts(engine->text);
 #ifndef OUT_OF_DATE
 	init_entities(&engine->objects, engine,engine->drenderer);
-#else
-    //memset(&engine->scene, 0, sizeof(PakkiPhysics::worldScene));
-    //PakkiPhysics::init_scene(&engine->scene, PakkiPhysics::vec2{ 100,100 }, PakkiPhysics::vec2{ 200,200 },FileSystem::load_sprite(laatikko,engine).ID);
 #endif // !OUT_OF_DATE
-	init_inputs();
 	LOGI("engine inited\n");
 }
 //#ifdef P_WINDOWS
@@ -140,12 +136,7 @@ void engine_events(engine* engine, double deltaTime, float fps)
 #endif
 	post_batch_process(engine->batch);
 	populate_debugrender_buffers(engine->drenderer);
-	glm::vec2 wpos = point_to_world_position(engine->camera, &engine->mousePos);
 
-	char buf[64];
-	char buf2[64];
-	sprintf(buf, "fps %.2f", fps);
-	sprintf(buf2, "x %.2f y %.2f", wpos.x, wpos.y);
 
 	update_camera(engine->camera);
 }
@@ -156,7 +147,5 @@ void engine_clearup(engine* engine)
 	dispose_shader(engine->shader);
 	dispose_debug_renderer(engine->drenderer);
     //PakkiPhysics::dispose_scene(&engine->scene);
-	dispose_inputs();
-
 	//dispose_fonts(engine->text);
 }

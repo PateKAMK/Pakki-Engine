@@ -12,51 +12,31 @@ enum class mouseButton
 };
 
 
+struct input
+{
+	bool*		keys;
+	bool*		lastKeys;
+	bool		update;
+	float		xMouse;
+	float		yMouse;
+	float		xWorld;
+	float		yWorld;
+	uint32_t	size;
+	mouse		mouseButtons{ 0 };
+	mouse		lastbuttons{ 0 };
+	bool		disableClicks;
+};
 
 
-void init_inputs();
-void update_keys();
-void dispose_inputs();
-bool is_key_pressed(const uint32_t key);
-bool is_key_active(const uint32_t key);
-void set_key(const uint32_t key,bool state);
-void set_mouse_button(const uint32_t mouse, const uint32_t action);
-void set_mouse_position(const double x, const double y);
-void get_mouse_pos(float* x, float* y);
-bool is_mouse_pressed(mouseButton button);
-bool is_mouse_active(mouseButton button);
-
-
-//class InputManager
-//{
-//public:
-//	void operator = (const InputManager&) = delete;
-//	bool keyState(unsigned int glfw_key)const;
-//	glm::vec2 getMousePos() { return _mouseCoords; }
-//	void setKey(unsigned int glfw_key, bool state);
-//	void setMousePos(const double &mouseX, const double &mouseY);
-//	void setMouseButton(unsigned int mousebutton, unsigned int action);
-//	void disableClicks() { disableClickForUI = true; }
-//	bool getMouseAble()const { return !disableClickForUI; }
-//	bool getMouseButtonState(mouseButton button);
-//	bool KeyPressed(unsigned int glfw_key)const;
-//	bool MousePressed(mouseButton button);
-//	bool MouseReleased(mouseButton button);
-//	void updateKeys(const glm::vec2& camPos, float cameraScale, int screenHeight, int screenWeight);
-//	static InputManager* single;
-//
-//private:
-//	InputManager();
-//	~InputManager();
-//	bool update;
-//	bool updateMouse;
-//	glm::vec2 _mouseCoords;
-//	glm::vec2 _mouseworldpos;
-//	bool *keys; // current frame
-//	bool *last; // last frame
-//	int size;
-//	mouse mousebuttons{ false,false };
-//	mouse lastFrameMousebuttons{ false,false };
-//	bool disableClickForUI;
-//};
-//
+// todo ota singleton pois
+void init_inputs(input* in);
+void update_keys(input* in);
+void dispose_inputs(input* in);
+bool is_key_pressed(input* in,const uint32_t key);
+bool is_key_active(input* in,const uint32_t key);
+void set_key(input* in,const uint32_t key,bool state);
+void set_mouse_button(input* in,const uint32_t mouse, const uint32_t action);
+void set_mouse_position(input* in,const double x, const double y);
+void get_mouse_pos(input* in,float* x, float* y);
+bool is_mouse_pressed(input* in,mouseButton button);
+bool is_mouse_active(input* in,mouseButton button);

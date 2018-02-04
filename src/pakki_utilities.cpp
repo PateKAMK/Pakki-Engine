@@ -275,7 +275,7 @@ void load_characters(Pakki::Font *font,engine *engine)
 	rowh = 0;
 
 
-	for (int i = 32; i < 128; i++) {
+	for (uint32_t i = 32; i < 128; i++) {
 		if (FT_Load_Char(face, i, FT_LOAD_RENDER)) {
 			fatalerror(false);
 		}
@@ -297,7 +297,7 @@ void load_characters(Pakki::Font *font,engine *engine)
 
 			data* d = (data*)malloc(sizeof(data) * g->bitmap.width* g->bitmap.rows);
 			unsigned char* pointerdata = g->bitmap.buffer;
-			for (int i = 0; i < g->bitmap.width* g->bitmap.rows; i++)
+			for (uint32_t i = 0; i < g->bitmap.width* g->bitmap.rows; i++)
 			{ 
 				d[i] = data{ 255,255,255, *pointerdata/* > (unsigned char)50? (unsigned char)255:(unsigned char)0*/ };
 				pointerdata++;

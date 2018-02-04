@@ -25,7 +25,6 @@ struct engine {
 	SpriteBatch*	batch;
 	void*			platformState;
 	DebugRenderer*	drenderer;
-	glm::vec2		mousePos;
 #ifndef  OUT_OF_DATE
 	Entities		objects;
 #endif // ! OUT_O
