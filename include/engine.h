@@ -35,7 +35,7 @@ struct engine {
 	keys			key;
 };
 
-extern void engine_init(engine* engine, Camera* camera, Shader* shader);
+extern void engine_init(engine* engine, Camera* camera, Shader* shader,float WorldX,float WorldY,float worldWidht,float WorldHeight);
 extern void engine_events(engine* engine,double deltaTime,float fps);
 extern int engine_draw(engine* engine);
 extern void engine_clearup(engine* engine);

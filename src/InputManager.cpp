@@ -34,8 +34,7 @@ void dispose_inputs(input* in)
 {
 	free(in->keys);
 	free(in->lastKeys);
-	free(in);
-	in = NULL;
+	
 }
 bool is_key_pressed(input* in,const uint32_t key)
 {

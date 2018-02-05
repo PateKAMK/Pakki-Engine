@@ -40,7 +40,7 @@ GLenum glCheckError_(const char *file, int line)
 	return errorCode;
 }
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
-void engine_init(engine* engine,Camera* camera,Shader* shader)
+void engine_init(engine* engine,Camera* camera,Shader* shader, float WorldX, float WorldY, float worldWidht, float WorldHeight)
 {
 	FileSystem::init_filesystem();
 #ifdef P_ANDROID

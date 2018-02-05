@@ -144,6 +144,7 @@
     <ClCompile Include="..\..\src\filesystem.cpp" />
     <ClCompile Include="..\..\src\freetype.cpp" />
     <ClCompile Include="..\..\src\InputManager.cpp" />
+    <ClCompile Include="..\..\src\objectManager.cpp" />
     <ClCompile Include="..\..\src\pakki.cpp" />
     <ClCompile Include="..\..\src\pakki_utilities.cpp" />
     <ClCompile Include="..\..\src\physics.cpp" />
@@ -154,7 +155,6 @@
     <ClCompile Include="..\..\src\window.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="objectManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />

@@ -8,8 +8,8 @@
 #include "freetype.h"
 #include <pakki_utilities.h>
 #include <soundsystem.h>
-
 #include <pakki.h>
+#include <objectManager.h>
 #define SOL_CHECK_ARGUMENTS 1
 #include <sol.hpp>
 #define FILEID 10
@@ -56,34 +56,70 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		}
 	}
 }
-int deny(lua_State* L) {
-	return luaL_error(L, "Cant crete new entries to this table!");
+
+#define EXPORT extern "C" __declspec(dllexport)
+static ObjectManager::objects* luaobjs;
+static Camera* luacam;
+EXPORT void set_camera(float x,float y,float scale)
+{
+	luacam->position.x = x;
+	luacam->position.y = y;
+	luacam->scale = scale;
+	luacam->update = true;
 }
-int main(int argc,const char **argv)
+EXPORT ObjectManager::object* get_object()
+{
+	ObjectManager::object* obj = luaobjs->objectPool.new_item();
+	memset(obj, 0, sizeof *obj);
+	return obj;
+}
+EXPORT ObjectManager::drawdata* get_sprite()
+{
+	ObjectManager::drawdata* spr = luaobjs->drawPool.new_item();
+	memset(spr, 0, sizeof *spr);
+	return spr;
+}
+EXPORT void dispose_sprite(ObjectManager::drawdata* spr)
+{
+	luaobjs->drawPool.delete_obj(spr);
+}
+EXPORT void dispose_object(ObjectManager::object* obj)
+{
+	if(obj->drawPtr != NULL)
+	{
+		luaobjs->drawPool.delete_obj(obj->drawPtr);
+	}
+	memset(obj, 0, sizeof *obj);
+	luaobjs->objectPool.delete_obj(obj);
+}
+int main(int argc, const char **argv)
 {
 	sol::state lua;
 	lua.open_libraries(sol::lib::base,
 		sol::lib::package, sol::lib::jit);
 	sol::table pakki_table = lua.create_named_table("Pakki");
 	sol::table meta = lua.create_table_with();
-	meta[sol::meta_function::new_index] = deny;
-	pakki_table.set("success", 1,
-		"fail",0);
-	pakki_table.set("MouseX", &inputs.xWorld,
-		"MouseY", &inputs.yWorld);
-	
+
+	ObjectManager::objects Objects;
+
 	lua.script_file("pakki.lua");
 	auto con = lua["configure"];
-	if(!con.valid())
+	if (!con.valid())
 	{
 		printf("Please do configure table");
 		getchar();
 		return fail;
 	}
 	Pakki::PakkiContext context;
-	
+
 	int w = con["ScreenX"];
 	int h = con["ScreenY"];
+	float WorldX = con["WorldX"];
+	float WorldY = con["WorldY"];
+	float worldW = con["WorldWidht"];
+	float worldH = con["WorldHeight"];
+	printf("World : %.2f : %.2f : %.2f : %.2f\n", WorldX, WorldY, worldW, worldH);
+	ObjectManager::init_objects(&Objects, ObjectManager::vec2{ WorldX,WorldY }, ObjectManager::vec2{ worldW, worldH});
 	soundsystem::initsounds();
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -118,6 +154,9 @@ int main(int argc,const char **argv)
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	Camera camera;
+	camera.position.x = WorldX;
+	camera.position.y = WorldY;
+	luacam = &camera;
 	camera.scale = 1.f;
 	Shader shader{ 0,0 };
 	engine engine;
@@ -131,7 +170,7 @@ int main(int argc,const char **argv)
 	engine.height = h;
 	engine.widht = w;
 	::k = &engine.key;
-	engine_init(&engine,&camera,&shader);
+	engine_init(&engine,&camera,&shader,WorldX,WorldY,worldW,worldH);
 	int num_draw_calls = 0;
 	init_inputs(&inputs);
 	init_pakki(&context, &engine,&num_draw_calls);
@@ -245,6 +284,7 @@ int main(int argc,const char **argv)
 		glfwSwapBuffers(window);
 
 	}
+	ObjectManager::dispose_objects(&Objects);
 	engine_clearup(&engine);
 	dispose_inputs(&inputs);
 	//clear up engine

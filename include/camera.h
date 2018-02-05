@@ -3,7 +3,7 @@
 #include <glm/glm/gtc/matrix_transform.hpp>
 
 
-typedef struct
+struct Camera
 {
 	glm::vec2	position;
 	glm::mat4	cameraMatrix;
@@ -11,7 +11,7 @@ typedef struct
 	glm::vec2	scaledDimensions;
 	float		scale;
 	bool		update;
-} Camera;
+};
 extern void init_camera(Camera* const camera,int screenWidht,int screenHeight);
 extern void update_camera(Camera* const camera);
 extern bool is_in_view(Camera* const camera, const glm::vec2 position, const glm::vec2 dimensions);

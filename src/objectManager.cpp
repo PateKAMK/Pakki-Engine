@@ -1,37 +1,7 @@
-#include <arrayD.h>
+#include "objectManager.h"
 #include <algorithm>
-#include <spritebatch.h>
 namespace ObjectManager
 {
-	typedef uint32_t state;
-	typedef uint32_t id;
-	struct vec2
-	{
-		float	x;
-		float	y;
-	};
-	struct vec4
-	{
-		float	x;
-		float	y;
-		float	z;
-		float	w;
-	};
-	struct drawdata
-	{
-		vec4		uv;
-		Color		color;
-		uint32_t	spriteid;
-		int			level;
-	};
-	struct object
-	{
-		vec2		pos;
-		vec2		dim;
-		state		s;
-		id			i;
-		drawdata*	drawPtr;
-	};
 
 	//GUADTREE
 #define USE_QUAD_TREE
@@ -40,15 +10,7 @@ namespace ObjectManager
 #endif //  USE_QUAD_TREE
 #define MAX_TREELEVEL 4
 #define MAX_OBJECTAMOUNT 10
-	struct tree
-	{
-		unsigned int				level;
-		dynamicArray<object*>		objects;
-		tree*						treebuffer;
-		vec2						pos;
-		vec2						dim;
-	};
-
+	
 	void create_new_node(tree* node, uint32_t level, const vec2& pos, const vec2& dim)
 	{
 		node->level = level;
@@ -354,7 +316,7 @@ namespace ObjectManager
 
 	
 
-
+/*
 	inline void get_id(id id,uint16_t* arr, uint16_t* ind)
 	{
 		arr = (uint16_t*)&id;
@@ -369,27 +331,8 @@ namespace ObjectManager
 		*arptr = ind;
 		arptr--;
 		*_id = *((id*)arptr);
-	}
-#define POOLSIZE 255
-	struct collisiontable
-	{
-		object* obj1;
-		object* obj2;
-	};
-	struct objects
-	{
-		pool<object, POOLSIZE>			objectPool;
-		tree							objTree;		
-		vec2							worldMid;
-		vec2							worldDims;
-		tree*							treeAllocator;
-		uint32_t						allocatorSize;
-		dynamicArray<collisiontable>	hardCollisionBuffer;//init
-		dynamicArray<collisiontable>	softCollisionBuffer;
-		dynamicArray<object*>			updateBuffer;
-		dynamicArray<object*>			generalcollisionBuffer;
-		dynamicArray<object*>			drawAbleOnes;
-	};
+	}*/
+
 	void init_objects(objects* objs,vec2 worldMid,vec2 dimensions)
 	{
 		memset(objs, 0, sizeof(objects));
@@ -399,6 +342,7 @@ namespace ObjectManager
 		objs->worldMid = worldMid;
 		objs->worldDims = dimensions;
 		objs->objectPool.init_pool();
+		objs->drawPool.init_pool();
 		create_new_node(&objs->objTree, 0, worldMid, dimensions);
 		objs->hardCollisionBuffer.init_array(50);
 		objs->softCollisionBuffer.init_array(50);
@@ -508,6 +452,7 @@ namespace ObjectManager
 		}
 		free(objs->treeAllocator);
 		objs->objectPool.dispose_pool();
+		objs->drawPool.dispose_pool();
 		objs->hardCollisionBuffer.dispose_array();
 		objs->softCollisionBuffer.dispose_array();
 		objs->updateBuffer.dispose_array();

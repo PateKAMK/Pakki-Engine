@@ -1,6 +1,10 @@
 configure = {
     ScreenX = 1200,
-    ScreenY = 800
+    ScreenY = 800,
+    WorldX = 0,
+    WorldY = 0,
+    WorldWidht = 500,
+    WorldHeight = 500,
 }
 
 
@@ -13,8 +17,6 @@ currentTime = 0
 function updatePakki(dt)
     currentTime = currentTime + dt
     print("updating pakki", currentTime)
-    print(Pakki.MouseX)
-    print(Pakki.MouseY)
     local x = 10;
-    return Pakki.success
+    return 1
 end
