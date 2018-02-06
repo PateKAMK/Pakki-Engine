@@ -1,3 +1,6 @@
+#ifdef FALSE
+
+
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -163,3 +166,4 @@ void ss_Fatal(const char *format, ...)
     std::cout << std::endl;
 }
 #endif
+#endif // FALSE

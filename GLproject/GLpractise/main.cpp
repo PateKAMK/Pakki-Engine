@@ -120,7 +120,7 @@ int main(int argc, const char **argv)
 	float worldH = con["WorldHeight"];
 	printf("World : %.2f : %.2f : %.2f : %.2f\n", WorldX, WorldY, worldW, worldH);
 	ObjectManager::init_objects(&Objects, ObjectManager::vec2{ WorldX,WorldY }, ObjectManager::vec2{ worldW, worldH});
-	soundsystem::initsounds();
+	//soundsystem::initsounds();
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -204,7 +204,7 @@ int main(int argc, const char **argv)
 		inputs.yWorld = mWpos.y;
 		static float volume = 0.1f;
 		static float pitch = 1.f;
-		soundsystem::ss->update(pause, volume, pitch);
+		//soundsystem::ss->update(pause, volume, pitch);
 		//LOGI("button %d\n", button);
 		start_frame(&context,glm::vec2(inputs.xMouse,inputs.yMouse),button);
 		double newTime = glfwGetTime();
