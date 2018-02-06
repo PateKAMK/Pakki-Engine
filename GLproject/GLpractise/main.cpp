@@ -96,7 +96,7 @@ int main(int argc, const char **argv)
 {
 	sol::state lua;
 	lua.open_libraries(sol::lib::base,
-		sol::lib::package, sol::lib::jit);
+		sol::lib::package, sol::lib::jit,sol::lib::ffi);
 	sol::table pakki_table = lua.create_named_table("Pakki");
 	sol::table meta = lua.create_table_with();
 

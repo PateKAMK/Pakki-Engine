@@ -6,7 +6,7 @@
 namespace ObjectManager
 {
 	typedef uint32_t	state;
-	typedef float		userID;
+	typedef uint32_t	userID;
 	struct vec2
 	{
 		float	x;

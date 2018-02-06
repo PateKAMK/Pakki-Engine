@@ -13,7 +13,7 @@
 - audio
 - android support
 - PakkiGUI
-- PakkiPhysics
+- Lua scripting
 
 ## Projects done over time
 
@@ -26,3 +26,5 @@
 - [stb_image](https://github.com/nothings/stb/blob/master/stb_image.h)
 - [GLFW](http://www.glfw.org/)
 - [Freetype2](https://www.freetype.org/)
+- [LuaJit](http://luajit.org/)
+- [Sol](https://github.com/ThePhD/sol2)

@@ -7,21 +7,21 @@
 #ifdef P_ANDROID
 #include <GLES2/gl2.h>
 #endif
-
-typedef struct
+#include <ctype.h>
+struct Color
 {
-	GLubyte r;
-	GLubyte g;
-	GLubyte b;
-	GLubyte a;
-}Color;
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;
+};
 
-typedef struct
+struct Vertex
 {
 	glm::vec2 position;
 	glm::vec2 uv; //soon tm TODO
 	Color color;
-}Vertex;
+};
 
 /*struct UV
 {

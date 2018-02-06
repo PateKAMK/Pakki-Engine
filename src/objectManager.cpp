@@ -337,7 +337,8 @@ namespace ObjectManager
 	{
 		memset(objs, 0, sizeof(objects));
 		constexpr uint32_t poolamount = 1 + 4 * 4 * 4;
-		objs->treeAllocator = (tree*)malloc(sizeof(tree) * poolamount);
+		objs->treeAllocator = (tree*)calloc(poolamount,sizeof(tree));
+
 		objs->allocatorSize = 1;
 		objs->worldMid = worldMid;
 		objs->worldDims = dimensions;

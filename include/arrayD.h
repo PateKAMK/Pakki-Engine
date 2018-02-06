@@ -26,6 +26,7 @@ public:
 	}
 	void dispose_array()
 	{
+		assert(data);
 		free(data);
 		data = NULL;
 	}
