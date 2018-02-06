@@ -92,6 +92,51 @@ EXPORT void dispose_object(ObjectManager::object* obj)
 	memset(obj, 0, sizeof *obj);
 	luaobjs->objectPool.delete_obj(obj);
 }
+EXPORT bool is_key_down(unsigned char key)
+{
+	switch (key)
+	{
+	case 'w':
+		return is_key_active(&inputs, GLFW_KEY_W);
+		break;
+	case 'a':
+		return is_key_active(&inputs, GLFW_KEY_A);
+		break;
+	case 's':
+		return is_key_active(&inputs, GLFW_KEY_S);
+		break;
+	case 'd':
+		return is_key_active(&inputs, GLFW_KEY_D);
+		break;
+	default:
+		return false;
+		break;
+	}
+}
+EXPORT bool is_key_activated(uint8_t key)
+{
+	switch (key)
+	{
+	case 'w':
+		return is_key_pressed(&inputs, GLFW_KEY_W);
+		break;
+	case 'a':
+		return is_key_pressed(&inputs, GLFW_KEY_A);
+		break;
+	case 's':
+		return is_key_pressed(&inputs, GLFW_KEY_S);
+		break;
+	case 'd':
+		return is_key_pressed(&inputs, GLFW_KEY_D);
+		break;
+	default:
+		return false;
+		break;
+	}
+}
+
+
+
 int main(int argc, const char **argv)
 {
 	sol::state lua;
@@ -102,7 +147,9 @@ int main(int argc, const char **argv)
 
 	ObjectManager::objects Objects;
 
-	lua.script_file("pakki.lua");
+		lua.script_file("pakki.lua");
+
+
 	auto con = lua["configure"];
 	if (!con.valid())
 	{

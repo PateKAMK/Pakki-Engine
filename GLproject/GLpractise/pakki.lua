@@ -1,44 +1,50 @@
 ffi.cdef[[
     void set_camera(float x,float y,float scale);
-    struct Color
+    typedef struct
     {
         uint8_t r;
         uint8_t g;
         uint8_t b;
         uint8_t a;
-    };
+    } Color;
    
-    struct vec4
+    typedef struct 
 	{
 		float	x;
 		float	y;
 		float	z;
 		float	w;
-    };
+    } vec4;
      
-    struct vec2
+    typedef struct 
 	{
 		float	x;
 		float	y;
-    };
+    } vec2;
     
-    struct drawdata
+    typedef struct 
     {
         vec4		uv;
-        //Color		color;
+        Color		color;
         uint32_t	spriteid;
         int			level;
-    };
-    /*
-    struct object
+    } drawdata;
+    typedef struct 
 	{
 		vec2		pos;
 		vec2		dim;
 		uint32_t	s;
 		uint32_t	i;
 		drawdata*	drawPtr;
-    };
-    object* get_object();*/
+    } object;
+
+    object* get_object();
+    void dispose_object(object* obj);
+    drawdata* get_sprite();
+    void dispose_sprite(drawdata* spr);
+    void set_camera(float x,float y,float scale);
+    bool is_key_down(unsigned char key);
+    bool is_key_activated(unsigned char key);
 ]]
 print("FFI done correctly")
 
@@ -53,14 +59,18 @@ configure = {
 
 
 function initPakki()
-     print("pakki inited from lua side")
-     local x = 10;
+    print("pakki inited from lua side")
+    local x = 10;
 end
 
 currentTime = 0
 function updatePakki(dt)
+    print("here")
     currentTime = currentTime + dt
-    print("updating pakki", currentTime)
+    if(ffi.C.is_key_down("w"))then
+        print("w pressed" ,currentTime)
+    end
+    --print("updating pakki", currentTime)
     local x = 10;
     return 1
 end
