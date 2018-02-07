@@ -18,15 +18,10 @@
 #define MAXBUFLEN 1000000
 namespace FileSystem
 {
-	static Texture picfilecache[maxpicfiles];
 
-	void init_filesystem()
-	{
-		memset(picfilecache, 0, sizeof(picfilecache));
-	}
 #ifdef P_WINDOWS
 
-	void load_file_to_buffer(const char* name, char** buffer, int* size,engine* engine)
+	void load_file_to_buffer(const char* name, char** buffer, int* size)
 	{
 		FILE *f = fopen(name, "rb");
 		if (f == NULL) {
@@ -43,15 +38,11 @@ namespace FileSystem
 		fclose(f);
 		(*buffer)[fsize] = 0;
 	}
-	Texture load_sprite(picture_files file, engine* engine, bool loadOneChannel)
+	Texture load_sprite_io(const char* file)
 	{
 		Texture texture;
-		if(picfilecache[file].ID) //jos on muistissa jo niin �l� lataa
-		{
-			texture = picfilecache[file];
-			return texture;
-		}
-		LOGI("loading %s\n",pic_file_names[file]);
+		
+		LOGI("loading %s\n",file);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //eetut
 		memset(&texture, 0, sizeof &texture);//prank
 		glGenTextures(1, &texture.ID);
@@ -64,38 +55,28 @@ namespace FileSystem
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // kokeile n�it� jos tulee ongelma textuurien v�leihin
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		unsigned char *data;
-		if(!loadOneChannel)data = stbi_load(pic_file_names[file], &texture.widht, &texture.height, &texture.channels, 0);
-		else data = stbi_load(pic_file_names[file], &texture.widht, &texture.height, &texture.channels, 1);
-
+		data = stbi_load(file, &texture.widht, &texture.height, &texture.channels, 0);
 		if (!data) {
-			LOGI("error loading %s", pic_file_names[file]);
+			LOGI("error loading %s", file);
 			memset(&texture, 0, sizeof &texture);
 			return texture;
 		}
-		if(!loadOneChannel)
+	
+		if (texture.channels == 3)
 		{
-			if(texture.channels == 3)
-			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.widht, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-				glGenerateMipmap(GL_TEXTURE_2D);
-			}
-			else if (texture.channels == 4)
-			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.widht, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-				glGenerateMipmap(GL_TEXTURE_2D);
-			}
-			else
-			{
-				fatalerror(false);
-			}
-		}
-		else 
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, texture.widht, texture.height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.widht, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
+		else if (texture.channels == 4)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.widht, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		else
+		{
+			fatalerror(false);
+		}
 		stbi_image_free(data);
-		picfilecache[file] = texture;
 		return texture;
 	}
 #endif // P_WINDOWS

@@ -52,7 +52,7 @@ namespace{
 )";
 
 }
-void load_characters(Pakki::Font *font, engine *engine);
+void load_characters(Pakki::Font *font);
 
 inline glm::vec2 screen_to_gui(glm::vec2 mpos)
 {
@@ -61,10 +61,10 @@ inline glm::vec2 screen_to_gui(glm::vec2 mpos)
 }
 void end_pakki(Pakki::Vertex* vertbuffer, Pakki::Renderbatch* batchBuffer, int BatchSize, int vertexSize);
 static int* draw_calls = nullptr;
-void init_pakki(Pakki::PakkiContext* context,engine* engine, int* numdraw)
+void init_pakki(Pakki::PakkiContext* context, int* numdraw)
 {
 	draw_calls = numdraw;
-	Pakki::init_pakki(context, FileSystem::load_sprite(gwen, engine,false).ID,0);
+	Pakki::init_pakki(context, FileSystem::load_sprite_io("gwen").ID,0);
 	memset(&pakkiShader, 0, sizeof(Shader));
 	GLuint vert = compile_shader(GL_VERTEX_SHADER, pakkivertsha);
 	GLuint frag = compile_shader(GL_FRAGMENT_SHADER, pakkifragsha);
@@ -99,7 +99,7 @@ void init_pakki(Pakki::PakkiContext* context,engine* engine, int* numdraw)
 
 	context->rendercallback = &end_pakki;
 
-	load_characters(&context->font,engine);
+	load_characters(&context->font);
 }
 
 void start_frame(Pakki::PakkiContext* context,glm::vec2 scrpos,bool mouseActive)
@@ -201,7 +201,7 @@ void dispose_pakki(Pakki::PakkiContext* context)
 #undef max
 #define MAXWIDTH 1024
 
-void load_characters(Pakki::Font *font,engine *engine)
+void load_characters(Pakki::Font *font)
 {
 	FT_Library  library;
 	FT_Face face;

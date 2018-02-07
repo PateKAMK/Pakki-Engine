@@ -6,7 +6,7 @@
 
 #include <engine.h>
 
-void init_pakki(Pakki::PakkiContext* context,engine* engine,int* numdraw);
+void init_pakki(Pakki::PakkiContext* context,int* numdraw);
 void start_frame(Pakki::PakkiContext* context,glm::vec2 mpossss, bool mouseActive);
 //void do_window();
 //void end_pakki();

@@ -12,6 +12,9 @@
 #include <objectManager.h>
 #define SOL_CHECK_ARGUMENTS 1
 #include <sol.hpp>
+#include<map>
+#include<string>
+#include<filesystem.h>
 #define FILEID 10
 static input inputs;
 enum ret
@@ -57,6 +60,13 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	}
 }
 
+struct spriteCache
+{
+	spriteCache() = default;
+	std::map<std::string, Texture> sprites;
+};
+Texture* load_sprite(spriteCache* cache, const char* path);
+
 #define EXPORT extern "C" __declspec(dllexport)
 static ObjectManager::objects* luaobjs;
 static Camera* luacam;
@@ -92,9 +102,13 @@ EXPORT void dispose_object(ObjectManager::object* obj)
 	memset(obj, 0, sizeof *obj);
 	luaobjs->objectPool.delete_obj(obj);
 }
-EXPORT bool is_key_down(unsigned char key)
+EXPORT void hello_world()
 {
-	switch (key)
+	printf("hello world");
+}
+EXPORT bool is_key_down(const char key[])
+{
+	switch (*key)
 	{
 	case 'w':
 		return is_key_active(&inputs, GLFW_KEY_W);
@@ -113,9 +127,9 @@ EXPORT bool is_key_down(unsigned char key)
 		break;
 	}
 }
-EXPORT bool is_key_activated(uint8_t key)
+EXPORT bool is_key_activated(const char key[])
 {
-	switch (key)
+	switch (*key)
 	{
 	case 'w':
 		return is_key_pressed(&inputs, GLFW_KEY_W);
@@ -220,7 +234,7 @@ int main(int argc, const char **argv)
 	engine_init(&engine,&camera,&shader,WorldX,WorldY,worldW,worldH);
 	int num_draw_calls = 0;
 	init_inputs(&inputs);
-	init_pakki(&context, &engine,&num_draw_calls);
+	init_pakki(&context,&num_draw_calls);
 	double t = 0.0;
 	constexpr double dt = 1.0 / 60.0;
 
@@ -239,6 +253,7 @@ int main(int argc, const char **argv)
 	int index = 0;
 	bool pause = true;
 	bool debuglines = false;
+	spriteCache Sprites;
 	lua["initPakki"]();
 	auto luaUpdate = lua["updatePakki"];
 	bool stopgame = false;
@@ -339,3 +354,21 @@ int main(int argc, const char **argv)
 	return pass;
 }
 
+
+
+struct spriteCache
+{
+	spriteCache() = default;
+	std::map<std::string, Texture> sprites;
+};
+Texture* load_sprite(spriteCache* cache,const char* path)
+{
+	auto tex = cache->sprites.find(path);
+	if(tex == cache->sprites.end())
+	{
+		Texture t = FileSystem::load_sprite_io(path);
+		cache->sprites.insert(std::make_pair(path,t));
+		return &t;
+	}
+	return &tex->second;
+}

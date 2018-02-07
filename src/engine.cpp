@@ -42,7 +42,6 @@ GLenum glCheckError_(const char *file, int line)
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
 void engine_init(engine* engine,Camera* camera,Shader* shader, float WorldX, float WorldY, float worldWidht, float WorldHeight)
 {
-	FileSystem::init_filesystem();
 #ifdef P_ANDROID
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -51,13 +50,13 @@ void engine_init(engine* engine,Camera* camera,Shader* shader, float WorldX, flo
 	init_camera(camera, engine->widht, engine->height);
 	char* vs; 
 	int size = 0;
-	FileSystem::load_file_to_buffer(txt_file_names[VERT_SHA], &vs, &size,engine);
+	FileSystem::load_file_to_buffer(txt_file_names[VERT_SHA], &vs, &size);
 	fatalerror(vs);
 	GLuint vert = compile_shader(GL_VERTEX_SHADER, vs);
 	free(vs);
 	char* fs;
 	size = 2;
-	FileSystem::load_file_to_buffer(txt_file_names[FRAG_SHA], &fs, &size,engine);
+	FileSystem::load_file_to_buffer(txt_file_names[FRAG_SHA], &fs, &size);
 	fatalerror(vert);
 	GLuint frag = compile_shader(GL_FRAGMENT_SHADER, fs);
 	free(fs);
@@ -118,9 +117,6 @@ struct entitity
 void engine_events(engine* engine, double deltaTime, float fps)
 {
 	
-
-
-
 	begin(engine->batch);
 #ifndef OUT_OF_DATE
 	update_objects(&engine->objects,&engine->key);
@@ -146,6 +142,4 @@ void engine_clearup(engine* engine)
 	dispose_batch(engine->batch);
 	dispose_shader(engine->shader);
 	dispose_debug_renderer(engine->drenderer);
-    //PakkiPhysics::dispose_scene(&engine->scene);
-	//dispose_fonts(engine->text);
 }

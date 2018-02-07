@@ -1,3 +1,4 @@
+local ffi = require("ffi")
 ffi.cdef[[
     void set_camera(float x,float y,float scale);
     typedef struct
@@ -43,8 +44,9 @@ ffi.cdef[[
     drawdata* get_sprite();
     void dispose_sprite(drawdata* spr);
     void set_camera(float x,float y,float scale);
-    bool is_key_down(unsigned char key);
-    bool is_key_activated(unsigned char key);
+    bool is_key_down(const char key[]);
+    bool is_key_activated(const char key[]);
+    void hello_world();
 ]]
 print("FFI done correctly")
 
@@ -65,10 +67,21 @@ end
 
 currentTime = 0
 function updatePakki(dt)
-    print("here")
+    --print("here")
+    -- ffi.C.hello_world()
+    -- ffi.C.is_key_down('a');
     currentTime = currentTime + dt
-    if(ffi.C.is_key_down("w"))then
+    if(ffi.C.is_key_activated("w"))then
         print("w pressed" ,currentTime)
+    end
+    if(ffi.C.is_key_activated("a"))then
+        print("a pressed" ,currentTime)
+    end
+    if(ffi.C.is_key_activated("s"))then
+        print("s pressed" ,currentTime)
+    end
+    if(ffi.C.is_key_activated("d"))then
+        print("d pressed" ,currentTime)
     end
     --print("updating pakki", currentTime)
     local x = 10;
