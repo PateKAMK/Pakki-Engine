@@ -58,6 +58,7 @@ namespace FileSystem
 		data = stbi_load(file, &texture.widht, &texture.height, &texture.channels, 0);
 		if (!data) {
 			LOGI("error loading %s", file);
+			assert(false);
 			memset(&texture, 0, sizeof &texture);
 			return texture;
 		}

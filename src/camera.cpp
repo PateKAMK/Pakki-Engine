@@ -12,8 +12,8 @@ void init_camera(Camera* const camera, int screenWidht, int screenHeight)
 	camera->scaledDimensions.y = screenHeight;
 	camera->update = true;
     //camera->scale = 1.0f;
-	//::screenHeigh = screenHeight;
-	//::screenWidht = screenWidht;
+	::screenHeigh = screenHeight;
+	::screenWidht = screenWidht;
 	//camera->position = glm::vec2{ 100 , 110};
 }
 void update_camera(Camera* const camera)
@@ -40,7 +40,6 @@ bool is_in_view(Camera* const camera,const glm::vec2 position,const glm::vec2 di
 	{
 		return true;
 	}
-
 	return false;
 }
 glm::vec2 point_to_world_position(const Camera* camera, const glm::vec2* point)

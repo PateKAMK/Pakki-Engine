@@ -65,11 +65,12 @@ struct spriteCache
 	spriteCache() = default;
 	std::map<std::string, Texture> sprites;
 };
-Texture* load_sprite(spriteCache* cache, const char* path);
+static spriteCache* luasprites;
 
 #define EXPORT extern "C" __declspec(dllexport)
 static ObjectManager::objects* luaobjs;
 static Camera* luacam;
+static DebugRenderer* luaDRend;
 EXPORT void set_camera(float x,float y,float scale)
 {
 	luacam->position.x = x;
@@ -83,12 +84,7 @@ EXPORT ObjectManager::object* get_object()
 	memset(obj, 0, sizeof *obj);
 	return obj;
 }
-EXPORT ObjectManager::drawdata* get_sprite()
-{
-	ObjectManager::drawdata* spr = luaobjs->drawPool.new_item();
-	memset(spr, 0, sizeof *spr);
-	return spr;
-}
+
 EXPORT void dispose_sprite(ObjectManager::drawdata* spr)
 {
 	luaobjs->drawPool.delete_obj(spr);
@@ -101,6 +97,11 @@ EXPORT void dispose_object(ObjectManager::object* obj)
 	}
 	memset(obj, 0, sizeof *obj);
 	luaobjs->objectPool.delete_obj(obj);
+}
+
+EXPORT void draw_box(float x,float y,float w, float h,float angle)
+{
+	draw_debug_box(luaDRend, x - w, y - h, w  * 2, h * 2, angle);
 }
 EXPORT void hello_world()
 {
@@ -151,6 +152,33 @@ EXPORT bool is_key_activated(const char key[])
 
 
 
+Texture* load_sprite(spriteCache* cache,const char* path)
+{
+	auto tex = cache->sprites.find(path);
+	if(tex == cache->sprites.end())
+	{
+		Texture t = FileSystem::load_sprite_io(path);
+		cache->sprites.insert(std::make_pair(path,t));
+		return &t;
+	}
+	return &tex->second;
+}
+
+EXPORT  ObjectManager::drawdata* load_picture(const char* path)
+{
+	ObjectManager::drawdata* data = luaobjs->drawPool.new_item();
+	data->color = Color{ 255,255,255,255 };
+	data->level = 0;
+	data->spriteid = load_sprite(luasprites, path)->ID;
+	data->uv = ObjectManager::vec4{ 0,0,1,1 };
+	return data;
+}
+EXPORT void update_objects()
+{
+	ObjectManager::update_objects(luaobjs);
+}
+
+
 int main(int argc, const char **argv)
 {
 	sol::state lua;
@@ -160,7 +188,7 @@ int main(int argc, const char **argv)
 	sol::table meta = lua.create_table_with();
 
 	ObjectManager::objects Objects;
-
+	luaobjs = &Objects;
 		lua.script_file("pakki.lua");
 
 
@@ -222,8 +250,10 @@ int main(int argc, const char **argv)
 	Shader shader{ 0,0 };
 	engine engine;
 	memset(&engine, 0, sizeof(engine));
+	engine.objs = &Objects;
 	SpriteBatch batch;
 	DebugRenderer drenderer;
+	luaDRend = &drenderer;
 	engine.batch = &batch;
 	engine.drenderer = &drenderer;
 //	FontRenderer font;
@@ -254,6 +284,7 @@ int main(int argc, const char **argv)
 	bool pause = true;
 	bool debuglines = false;
 	spriteCache Sprites;
+	luasprites = &Sprites;
 	lua["initPakki"]();
 	auto luaUpdate = lua["updatePakki"];
 	bool stopgame = false;
@@ -336,6 +367,8 @@ int main(int argc, const char **argv)
 			{
 				int suc = luaUpdate(dt);
 				if (!suc) stopgame = true;
+				draw_debug_box(engine.drenderer, WorldX - worldW, WorldY - worldH, worldW * 2, worldH *2, 0);
+				
 				engine_events(&engine, dt,currentFps);
 			}
 			update_keys(&inputs);
@@ -355,20 +388,3 @@ int main(int argc, const char **argv)
 }
 
 
-
-struct spriteCache
-{
-	spriteCache() = default;
-	std::map<std::string, Texture> sprites;
-};
-Texture* load_sprite(spriteCache* cache,const char* path)
-{
-	auto tex = cache->sprites.find(path);
-	if(tex == cache->sprites.end())
-	{
-		Texture t = FileSystem::load_sprite_io(path);
-		cache->sprites.insert(std::make_pair(path,t));
-		return &t;
-	}
-	return &tex->second;
-}

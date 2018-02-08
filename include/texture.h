@@ -6,7 +6,7 @@
 
 typedef struct
 {
-	GLuint ID;
+	unsigned int ID;
 	int widht;
 	int height;
 	int channels;

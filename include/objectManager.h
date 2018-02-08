@@ -65,6 +65,7 @@ namespace ObjectManager
 	};
 
 	void init_objects(objects* objs, vec2 worldMid, vec2 dimensions);
-	void get_collisions(tree* node, dynamicArray<object*>* buffer, object* obj);
+	void update_objects(objects* obj);
 	void dispose_objects(objects* objs);
+	void draw_objects(dynamicArray<object*>* drawObjs, SpriteBatch* batch);
 }

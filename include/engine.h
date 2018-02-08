@@ -8,6 +8,7 @@
 #include <physics.h>
 #include <InputManager.h>
 //#include <freetype.h>
+#include <objectManager.h>
 enum class EngineStates:int
 {
 
@@ -19,12 +20,13 @@ struct keys
 	bool arrowU;
 };
 struct engine {
-	Camera*			camera;
-	Shader*			shader;
-	EngineStates	state;
-	SpriteBatch*	batch;
-	void*			platformState;
-	DebugRenderer*	drenderer;
+	Camera*					camera;
+	Shader*					shader;
+	EngineStates			state;
+	SpriteBatch*			batch;
+	void*					platformState;
+	DebugRenderer*			drenderer;
+	ObjectManager::objects* objs;
 #ifndef  OUT_OF_DATE
 	Entities		objects;
 #endif // ! OUT_O

@@ -144,7 +144,7 @@ public:
 	void init_pool()
 	{
 		_currentArraySize = 0;
-		T* newdata = (T*)malloc(sizeof(T)* poolSize);
+		T* newdata = (T*)calloc(poolSize,sizeof(T));
         _data.init_array();
         _freelist.init_array();
 		_data.push_back(newdata);
@@ -170,7 +170,7 @@ public:
 		if (_currentArraySize >= poolSize)
 		{
 			_currentArraySize = 0;
-			T* newdata = (T*)calloc(0,sizeof(T)* poolSize);
+			T* newdata = (T*)calloc(poolSize,sizeof(T));
 			_data.push_back(newdata);
 		}
 		T** currentArray = _data.get_back();

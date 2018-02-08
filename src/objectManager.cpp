@@ -357,7 +357,7 @@ namespace ObjectManager
 		float disY = std::abs(obj1->pos.y - obj2->pos.y);
 		return disx < obj1->dim.x + obj2->dim.y && disY < obj1->dim.y + obj2->dim.y;
 	}
-	void get_collisions_to_buffer(objects* objs)
+	void update_objects(objects* objs)
 	{
 		clear_tree(&objs->objTree);
 		objs->updateBuffer.clear_array();

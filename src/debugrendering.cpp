@@ -8,9 +8,9 @@ namespace {
 	//The vertex shader operates on each vertex
 	//input data from the VBO. Each vertex is 2 floats
 	in vec2 vertexPosition;
-	in vec4 vertexColor;
+
 	out vec2 fragmentPosition;
-	out vec4 fragmentColor;
+
 	uniform mat4 P;
 	void main() {
 		//Set the x,y position on the screen
@@ -22,18 +22,15 @@ namespace {
 		gl_Position.w = 1.0;
     
 		fragmentPosition = vertexPosition;
-    
-		fragmentColor = vertexColor;
 	})";
 	const char* FRAG_SRC = R"(#version 130
 	//The fragment shader operates on each pixel in a given polygon
 	in vec2 fragmentPosition;
-	in vec4 fragmentColor;
 	//This is the 3 component float vector that gets outputted to the screen
 	//for each pixel.
 	out vec4 color;
 	void main() {
-		color = fragmentColor;
+		color = vec4(1,1,1,1);
 	})";
 }
 #endif
@@ -91,7 +88,6 @@ void init_debug_renderer(DebugRenderer* drenderer)
 	fatalerror(frag);
 	drenderer->m_prog.program = glCreateProgram();
 	add_attribute(&drenderer->m_prog, "vertexPosition");
-	add_attribute(&drenderer->m_prog, "vertexColor");
 	glAttachShader(drenderer->m_prog.program, vert);
 	glAttachShader(drenderer->m_prog.program, frag);
 	fatalerror(link_shader(&drenderer->m_prog, vert, frag));
@@ -109,8 +105,6 @@ void init_debug_renderer(DebugRenderer* drenderer)
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, pos));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, color));
 	glBindVertexArray(0);
 
 
@@ -156,42 +150,36 @@ void init_debug_renderer(DebugRenderer* drenderer)
 }
 #endif // P_ANDROID
 
-void draw_debug_line(DebugRenderer* drenderer, const glm::vec2* a, const glm::vec2* b, const Color* color)
+void draw_debug_line(DebugRenderer* drenderer, const glm::vec2* a, const glm::vec2* b)
 {
 	GLuint size = get_array_size<DebugVertex>(drenderer->dyArrDeVert);
 	resize_array<DebugVertex>(&(drenderer->dyArrDeVert),size + 2);
 	drenderer->dyArrDeVert[size].pos = *a;
-	drenderer->dyArrDeVert[size].color = *color;
 	drenderer->dyArrDeVert[size +1].pos = *b;
-	drenderer->dyArrDeVert[size + 1].color = *color;
 	push_back_dyn_array<GLuint>(&(drenderer->dyArrIndi), &size);
 	size++;
 	push_back_dyn_array<GLuint>(&(drenderer->dyArrIndi), &size);
 
 }
-void draw_debug_box(DebugRenderer* drenderer, const glm::vec4* destRect,const Color* color,float angle)
+void draw_debug_box(DebugRenderer* drenderer,const float x,const float y,const float w,const float h,float angle)
 {
 	GLuint size = get_array_size<DebugVertex>(drenderer->dyArrDeVert);
 	resize_array<DebugVertex>(&drenderer->dyArrDeVert, size + 4);
 
-	glm::vec2 halfDims(destRect->z / 2.f, destRect->w / 2.f);
+	glm::vec2 halfDims(w / 2.f, h / 2.f);
 
 	glm::vec2 t1(-halfDims.x, halfDims.y);
 	glm::vec2 t2(-halfDims.x, -halfDims.y);
 	glm::vec2 t3(halfDims.x, -halfDims.y);
 	glm::vec2 t4(halfDims.x, halfDims.y);
 
-	glm::vec2 positionOffSet(destRect->x, destRect->y);
+	glm::vec2 positionOffSet(x, y);
 
-	//if(angle == 0)
-	//{
-		drenderer->dyArrDeVert[size].color = *color;
+	/*if(angle != 0)
+	{*/
 		drenderer->dyArrDeVert[size].pos = rotatePoint(t1,angle) + halfDims + positionOffSet;
-		drenderer->dyArrDeVert[size + 1].color = *color;
 		drenderer->dyArrDeVert[size + 1].pos = rotatePoint(t2, angle) + halfDims + positionOffSet;
-		drenderer->dyArrDeVert[size + 2].color = *color;
 		drenderer->dyArrDeVert[size + 2].pos = rotatePoint(t3, angle) + halfDims + positionOffSet;
-		drenderer->dyArrDeVert[size + 3].color = *color;
 		drenderer->dyArrDeVert[size + 3].pos = rotatePoint(t4, angle) + halfDims + positionOffSet;
 	//}
 	push_back_dyn_array<GLuint>(&drenderer->dyArrIndi, &size);
@@ -248,6 +236,7 @@ void dispose_debug_renderer(DebugRenderer* drenderer)
 }
 void render_debug_lines(DebugRenderer* drenderer,glm::mat4x4* cameramatrix)
 {
+	if (drenderer->_numElements == 0) return;
 	use_shader(&drenderer->m_prog);
 	set_matrix(&drenderer->m_prog, "P", cameramatrix);
 	glLineWidth(0.5);

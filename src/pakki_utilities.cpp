@@ -64,7 +64,7 @@ static int* draw_calls = nullptr;
 void init_pakki(Pakki::PakkiContext* context, int* numdraw)
 {
 	draw_calls = numdraw;
-	Pakki::init_pakki(context, FileSystem::load_sprite_io("gwen").ID,0);
+	Pakki::init_pakki(context, FileSystem::load_sprite_io("gwen.png").ID,0);
 	memset(&pakkiShader, 0, sizeof(Shader));
 	GLuint vert = compile_shader(GL_VERTEX_SHADER, pakkivertsha);
 	GLuint frag = compile_shader(GL_FRAGMENT_SHADER, pakkifragsha);

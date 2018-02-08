@@ -103,6 +103,7 @@ int engine_draw(engine* engine)
 	unuse_shader(engine->shader);
 	render_debug_lines(engine->drenderer,&engine->camera->cameraMatrix);
 	ret += 1;
+
 	return ret;
 //	render_text(engine->text);
 }
@@ -127,9 +128,10 @@ void engine_events(engine* engine, double deltaTime, float fps)
         PakkiPhysics::update_objects(engine->scene, deltaTime / 1.f, &engine->key);
     }
     PakkiPhysics::draw_objects(&engine->scene, engine->batch);*/
-	Color c{ 255,255,255,255 };
-	draw_debug_box(engine->drenderer, &glm::vec4(100 - 60 - 60 - 30, 100 + 3 + 60 - 30, 30 + 30, 30 + 30),&c,0);
+	draw_debug_box(engine->drenderer, 0, 0, 30 + 30, 30 + 30,0);
 #endif
+	//ObjectManager
+	ObjectManager::draw_objects(&engine->objs->drawAbleOnes, engine->batch);
 	post_batch_process(engine->batch);
 	populate_debugrender_buffers(engine->drenderer);
 
