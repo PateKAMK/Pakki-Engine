@@ -52,7 +52,6 @@ namespace ObjectManager
 	{
 		pool<object, POOLSIZE>			objectPool;
 		pool<drawdata, POOLSIZE>		drawPool;
-		tree							objTree;
 		vec2							worldMid;
 		vec2							worldDims;
 		tree*							treeAllocator;
@@ -63,6 +62,12 @@ namespace ObjectManager
 		dynamicArray<object*>			generalcollisionBuffer;
 		dynamicArray<object*>			drawAbleOnes;
 	};
+	enum objstate : state
+	{
+		Static = (1 << 1),
+		Moving = (1 << 2)
+	};
+
 
 	void init_objects(objects* objs, vec2 worldMid, vec2 dimensions);
 	void update_objects(objects* obj);

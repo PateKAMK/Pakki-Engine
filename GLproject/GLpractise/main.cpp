@@ -78,10 +78,26 @@ EXPORT void set_camera(float x,float y,float scale)
 	luacam->scale = scale;
 	luacam->update = true;
 }
-EXPORT ObjectManager::object* get_object()
+EXPORT ObjectManager::object* get_object_static(float x,float y,float w, float h)
 {
 	ObjectManager::object* obj = luaobjs->objectPool.new_item();
 	memset(obj, 0, sizeof *obj);
+	obj->pos.x = x;
+	obj->pos.y = y;
+	obj->dim.x = w;
+	obj->dim.y = h;
+	obj->s = ObjectManager::Static;
+	return obj;
+}
+EXPORT ObjectManager::object* get_object_moving(float x, float y, float w, float h)
+{
+	ObjectManager::object* obj = luaobjs->objectPool.new_item();
+	memset(obj, 0, sizeof *obj);
+	obj->pos.x = x;
+	obj->pos.y = y;
+	obj->dim.x = w;
+	obj->dim.y = h;
+	obj->s = ObjectManager::Moving;
 	return obj;
 }
 
@@ -102,6 +118,10 @@ EXPORT void dispose_object(ObjectManager::object* obj)
 EXPORT void draw_box(float x,float y,float w, float h,float angle)
 {
 	draw_debug_box(luaDRend, x - w, y - h, w  * 2, h * 2, angle);
+}
+EXPORT void draw_line(float x1,float y1,float x2,float y2)
+{
+	draw_debug_line(luaDRend, x1, y1, x2, y2);
 }
 EXPORT void hello_world()
 {

@@ -150,16 +150,15 @@ void init_debug_renderer(DebugRenderer* drenderer)
 }
 #endif // P_ANDROID
 
-void draw_debug_line(DebugRenderer* drenderer, const glm::vec2* a, const glm::vec2* b)
+void draw_debug_line(DebugRenderer* drenderer,const float x, const float y,const float x2,const float y2)
 {
 	GLuint size = get_array_size<DebugVertex>(drenderer->dyArrDeVert);
 	resize_array<DebugVertex>(&(drenderer->dyArrDeVert),size + 2);
-	drenderer->dyArrDeVert[size].pos = *a;
-	drenderer->dyArrDeVert[size +1].pos = *b;
+	drenderer->dyArrDeVert[size].pos =  glm::vec2(x,y);
+	drenderer->dyArrDeVert[size +1].pos = glm::vec2(x2,y2);
 	push_back_dyn_array<GLuint>(&(drenderer->dyArrIndi), &size);
 	size++;
 	push_back_dyn_array<GLuint>(&(drenderer->dyArrIndi), &size);
-
 }
 void draw_debug_box(DebugRenderer* drenderer,const float x,const float y,const float w,const float h,float angle)
 {

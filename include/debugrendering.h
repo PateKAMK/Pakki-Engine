@@ -22,7 +22,7 @@ typedef struct
 }DebugRenderer;
 
 extern void init_debug_renderer(DebugRenderer* drenderer);
-extern void draw_debug_line(DebugRenderer* drenderer, const glm::vec2* a, const glm::vec2* b);
+extern void draw_debug_line(DebugRenderer* drenderer, const float x, const float y, const float x2, const float y2);
 extern void render_debug_lines(DebugRenderer* drenderer, glm::mat4x4* cameramatrix);
 extern void dispose_debug_renderer(DebugRenderer* drenderer);
 extern void populate_debugrender_buffers(DebugRenderer* drenderer);

@@ -113,6 +113,7 @@ namespace ObjectManager
 		{
 			if (node->treebuffer == NULL)
 			{
+				int s = node - allocator;
 				split_tree(node, allocator, allocatorsize);
 			}
 			uint32_t i = 0;
@@ -308,11 +309,6 @@ namespace ObjectManager
 #endif //USE_GRID
 	/* OBJECTS */
 
-	enum objstate : state
-	{
-		Static = (1<<1),
-		Moving = (1<<2)
-	};
 
 	
 
@@ -344,7 +340,8 @@ namespace ObjectManager
 		objs->worldDims = dimensions;
 		objs->objectPool.init_pool();
 		objs->drawPool.init_pool();
-		create_new_node(&objs->objTree, 0, worldMid, dimensions);
+		create_new_node(objs->treeAllocator, 0, worldMid, dimensions);
+		objs->allocatorSize = 1;
 		objs->hardCollisionBuffer.init_array(50);
 		objs->softCollisionBuffer.init_array(50);
 		objs->updateBuffer.init_array(POOLSIZE);
@@ -359,7 +356,8 @@ namespace ObjectManager
 	}
 	void update_objects(objects* objs)
 	{
-		clear_tree(&objs->objTree);
+		clear_tree(objs->treeAllocator);
+		objs->allocatorSize = 1;
 		objs->updateBuffer.clear_array();
 		objs->drawAbleOnes.clear_array();
 		for(uint32_t i = 0; i < objs->objectPool._data._size; i++)
@@ -372,7 +370,8 @@ namespace ObjectManager
 					object** drawthis = objs->drawAbleOnes.get_new_item();
 					*drawthis = &(objs->objectPool._data.data[i])[j];
 				}
-				insert_to_tree(&objs->objTree, &(objs->objectPool._data.data[i])[j], objs->treeAllocator, &objs->allocatorSize);
+				assert((objs->objectPool._data.data[i])[j].s < 5);
+				insert_to_tree(objs->treeAllocator, &(objs->objectPool._data.data[i])[j], objs->treeAllocator, &objs->allocatorSize);
 				//if ((objs->objectPool._data.data[i])[j].s == objstate::Static) continue; this would be optimal but then we cannot be dure that everything collides
 				object** ptr = objs->updateBuffer.get_new_item();
 				*ptr = &(objs->objectPool._data.data[i])[j];
@@ -387,6 +386,7 @@ namespace ObjectManager
 			for(uint32_t collInd = 0; collInd < objs->generalcollisionBuffer._size; collInd++)
 			{
 				object* collider = objs->generalcollisionBuffer.data[collInd];
+				assert(collider->s < 5);
 				if (collider == currenObject)continue;
 				if (currenObject->s == objstate::Static && collider->s == objstate::Static)continue;
 				if (!AABB(currenObject, collider))continue;
@@ -466,6 +466,7 @@ namespace ObjectManager
 		for(uint32_t i = 0; i < drawObjs->_size;i++)
 		{
 			assert(drawObjs->data[i]->drawPtr != NULL);
+			assert(drawObjs->data[i]->s == Moving || drawObjs->data[i]->s == Static);
 			glm::vec4 destRec;
 			glm::vec2 pos((int)drawObjs->data[i]->pos.x, (int)drawObjs->data[i]->pos.y);
 			destRec.x = (pos.x - (int)drawObjs->data[i]->dim.x);
