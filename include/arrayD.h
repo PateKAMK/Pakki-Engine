@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdint.h>
-
+#include <memsebug.h>
+#include <functional>
 template<typename T>
 class dynamicArray final
 {
@@ -77,9 +78,18 @@ public:
 	{
 		if (new_size > _allocated_size)
 		{
-			_allocated_size = new_size;
-			realloc(data, _sizeof(T) *(size_t)_allocated_size);
+			printf("new Size : %d\n", new_size);
+			_allocated_size = new_size*2;
+			T* temp = data;
+			data = (T*)realloc(data, sizeof(T) *_allocated_size);
+			assert(data);
+			if(!data)
+			{
+				data = temp;
+				free(data);
+			}
 		}
+		_size = new_size;
 	}
 	T* get_new_item()
 	{
@@ -107,6 +117,75 @@ public:
 		{
 			data[index] = data[--_size];
 		}
+
+	}
+	void quick_sort(int start, int size, std::function<bool(T* lhv, T* rhv)> userfunc)
+	{
+		if(size <= 2)
+		{
+			if(size == 2)
+			{
+				if(!userfunc(&data[start],&data[start + size - 1]))
+				{
+					T temp = data[start];
+					data[start] = data[start + size - 1];
+					data[start + size - 1] = temp;
+				}
+			}
+			return;
+		}
+		int mid = (int)(start + (size / 2.f));
+		int last = start + size - 1;
+
+		if(!userfunc(&data[start],&data[mid]))
+		{
+			T temp = data[start];
+			data[start] = data[mid];
+			data[mid] = temp;
+		}
+		if (!userfunc(&data[mid], &data[last]))
+		{
+			T temp = data[mid];
+			data[mid] = data[last];
+			data[last] = temp;
+		}
+		if (!userfunc(&data[start], &data[mid]))
+		{
+			T temp = data[start];
+			data[start] = data[mid];
+			data[mid] = temp;
+		}
+
+		int lower = start;
+		int higher = last;
+
+		T pivot = data[mid];
+		data[mid] = data[start];
+
+		while(lower < higher)
+		{
+			while(userfunc(&pivot,&data[higher]) && lower < higher)
+			{
+				higher--;
+			}
+			if(higher != lower)
+			{
+				data[lower] = data[higher];
+				lower++;
+			}
+			while(userfunc(&data[lower],&pivot) && lower < higher)
+			{
+				lower++;
+			}
+			if(higher != lower)
+			{
+				data[higher] = data[lower];
+				higher--;
+			}
+		}
+		data[lower] = pivot;
+		quick_sort(start, lower - start, userfunc);
+		quick_sort(lower + 1, last - lower, userfunc);
 
 	}
 };

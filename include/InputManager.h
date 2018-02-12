@@ -1,5 +1,7 @@
 #pragma once
 #include <glm\glm\glm.hpp>
+#include <memsebug.h>
+
 struct mouse
 {
 	bool mouse1;

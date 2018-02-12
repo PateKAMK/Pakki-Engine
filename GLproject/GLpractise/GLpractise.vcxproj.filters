@@ -36,9 +36,6 @@
     <ClCompile Include="..\..\src\filesystem.cpp">
       <Filter>Source Files\implement</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -78,6 +75,12 @@
     <ClCompile Include="..\..\src\objectManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\memdebug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\InstancedRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
@@ -90,6 +93,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\physics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\memsebug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

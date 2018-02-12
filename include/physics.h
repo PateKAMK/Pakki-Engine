@@ -5,6 +5,7 @@
 
 #include "arrayD.h"
 #include <spritebatch.h>
+#include <memsebug.h>
 
     struct keys;
 namespace PakkiPhysics

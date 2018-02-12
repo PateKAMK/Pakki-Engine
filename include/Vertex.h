@@ -21,6 +21,7 @@ struct Vertex
 	glm::vec2 position;
 	glm::vec2 uv; //soon tm TODO
 	Color color;
+	float textureid;
 };
 
 /*struct UV

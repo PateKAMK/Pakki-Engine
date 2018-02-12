@@ -1,27 +1,29 @@
 #version 330 core
-//ben
-in vec2 vertexPosition;
-in vec4 vertexColor;
-in vec2 vertexUV;
+layout (location = 0) in vec2 vertexPosition;
+layout (location = 1)in vec4 vertexColor;
+layout (location = 2)in vec2 vertexUV;
+layout (location = 3) in float id;
+
 //in float angle
-out vec2 fragmentPosition;
-out vec4 fragmentColor;
-out vec2 fragmentUV;
+
+
+out DATA 
+{
+	vec4 fragmentColor;
+	vec2 fragmentUV;
+	float texid; 
+} vs_out;
+
 
 uniform mat4 P;
 
 void main() {
-    //Set the x,y position on the screen
     gl_Position.xy = (P * vec4(vertexPosition, 0.0, 1.0)).xy;
-    //the z position is zero since we are in 2D
-    gl_Position.z = 0.0;
+    gl_Position.z = 0.0;    
+    gl_Position.w = 1.0;  
     
-    //Indicate that the coordinates are normalized
-    gl_Position.w = 1.0;
+    vs_out.fragmentColor = vertexColor;
     
-    fragmentPosition = vertexPosition;
-    
-    fragmentColor = vertexColor;
-    
-    fragmentUV = vec2(vertexUV.x, 1.0 - vertexUV.y);
+    vs_out.fragmentUV = vec2(vertexUV.x, 1.0 - vertexUV.y);
+	vs_out.texid = id;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm/common.hpp>
 #include <glm/glm/gtc/matrix_transform.hpp>
+#include <memsebug.h>
 
 
 struct Camera

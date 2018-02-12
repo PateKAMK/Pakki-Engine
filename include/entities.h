@@ -6,6 +6,8 @@
 #include <spritebatch.h>
 #include <debugrendering.h>
 //#include <filesystem.h>
+#include <memsebug.h>
+
 typedef int objID;
 typedef struct
 {

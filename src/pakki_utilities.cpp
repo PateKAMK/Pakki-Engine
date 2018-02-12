@@ -172,7 +172,7 @@ void end_pakki(Pakki::Vertex* vertbuffer, Pakki::Renderbatch* batchBuffer, int B
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, Pakki::fet_id());
 	glUniform1i(uniform_tex, 0);
-	glBindTexture(GL_TEXTURE_2D, Pakki::fet_id());
+	//glBindTexture(GL_TEXTURE_2D, Pakki::fet_id());
 
 	glBindVertexArray(vao);
 

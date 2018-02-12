@@ -77,9 +77,65 @@ namespace FileSystem
 		{
 			fatalerror(false);
 		}
+		//GLubyte* pixels = (GLubyte*)malloc(sizeof(GLubyte) * 100 * 100 * 4);
+
+		//glGetTexImage(GL_TEXTURE_2D, 0 ​, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 		stbi_image_free(data);
 		return texture;
 	}
+	Texture reload_texture(const GLuint texID,unsigned char* data,int widht,int height)
+	{
+		glDeleteTextures(1, &texID);
+		Texture texture;
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //eetut
+		memset(&texture, 0, sizeof &texture);//prank
+		glGenTextures(1, &texture.ID);
+		glBindTexture(GL_TEXTURE_2D, texture.ID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT/* GL_CLAMP_TO_EDGE *//*GL_REPEAT*/); //https://www.opengl.org/discussion_boards/showthread.php/167808-2D-texture-problem-lines-between-textures
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT /*GL_CLAMP_TO_EDGE*/  /*GL_REPEAT*/);
+
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // kokeile n�it� jos tulee ongelma textuurien v�leihin
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widht, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		texture.height = height;
+		texture.widht = widht;
+		texture.channels = 4;
+		return texture;
+	}
+	Texture load_sprite_to_buffer(const char* file,unsigned char** data)
+	{
+		Texture texture;
+
+		LOGI("loading %s\n", file);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //eetut
+		memset(&texture, 0, sizeof &texture);//prank
+		glGenTextures(1, &texture.ID);
+		glBindTexture(GL_TEXTURE_2D, texture.ID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT/* GL_CLAMP_TO_EDGE *//*GL_REPEAT*/); //https://www.opengl.org/discussion_boards/showthread.php/167808-2D-texture-problem-lines-between-textures
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT /*GL_CLAMP_TO_EDGE*/  /*GL_REPEAT*/);
+
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // kokeile n�it� jos tulee ongelma textuurien v�leihin
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		*data = stbi_load(file, &texture.widht, &texture.height, &texture.channels, 0);
+		if (!*data) {
+			LOGI("error loading %s", file);
+			assert(false);
+			memset(&texture, 0, sizeof &texture);
+			return texture;
+		}
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.widht, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, *data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		return texture;
+	}
+
 #endif // P_WINDOWS
 #ifdef P_ANDROID
 	void load_file_to_buffer(const char* name, char** buffer, int* size, engine* engine)

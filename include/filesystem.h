@@ -2,6 +2,7 @@
 #include <engine.h>
 #include <texture.h>
 
+#include <memsebug.h>
 
 #define TXT_FILES(FILE) \
 		FILE(VERT_SHA)  \
@@ -62,6 +63,8 @@ enum txt_files
 
 namespace FileSystem
 {
-	extern void load_file_to_buffer(const char* name,char** buffer,int* size);
-	extern Texture load_sprite_io(const char* file);
+	void load_file_to_buffer(const char* name,char** buffer,int* size);
+	Texture load_sprite_io(const char* file);
+	Texture reload_texture(const GLuint texID, unsigned char* data, int widht, int height);
+	Texture load_sprite_to_buffer(const char* file, unsigned char** data);
 }

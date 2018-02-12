@@ -144,6 +144,8 @@
     <ClCompile Include="..\..\src\filesystem.cpp" />
     <ClCompile Include="..\..\src\freetype.cpp" />
     <ClCompile Include="..\..\src\InputManager.cpp" />
+    <ClCompile Include="..\..\src\InstancedRenderer.cpp" />
+    <ClCompile Include="..\..\src\memdebug.cpp" />
     <ClCompile Include="..\..\src\objectManager.cpp" />
     <ClCompile Include="..\..\src\pakki.cpp" />
     <ClCompile Include="..\..\src\pakki_utilities.cpp" />
@@ -152,7 +154,6 @@
     <ClCompile Include="..\..\src\soundsystem.cpp" />
     <ClCompile Include="..\..\src\spritebatch.cpp" />
     <ClCompile Include="..\..\src\stb_image.cpp" />
-    <ClCompile Include="..\..\src\window.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -162,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\arrayD.h" />
     <ClInclude Include="..\..\include\InputManager.h" />
+    <ClInclude Include="..\..\include\memsebug.h" />
     <ClInclude Include="..\..\include\physics.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

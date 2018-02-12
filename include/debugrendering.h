@@ -5,6 +5,8 @@
 #endif // P_WINDOWS
 #include <shader.h>
 #include <Vertex.h>
+#include <memsebug.h>
+
 typedef struct
 {
 	glm::vec2 pos;

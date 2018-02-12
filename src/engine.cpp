@@ -1,6 +1,5 @@
 #include "filesystem.h"
 #include "engine.h"
-#include "window.h"
 #include "projectDefinitions.h"
 #include <string>
 #include <iostream>
@@ -23,7 +22,6 @@ GLenum glCheckError_(const char *file, int line)
 	GLenum errorCode;
 	while ((errorCode = glGetError()) != GL_NO_ERROR)
 	{
-        fatalerror(false);
 		std::string error;
 		switch (errorCode)
 		{
@@ -36,6 +34,7 @@ GLenum glCheckError_(const char *file, int line)
 		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
 		}
 		std::cout << error << " | " << file << " (" << line << ")" << std::endl;
+        fatalerror(false);
 	}
 	return errorCode;
 }
@@ -68,10 +67,12 @@ void engine_init(engine* engine,Camera* camera,Shader* shader, float WorldX, flo
 	add_attribute(shader, "vertexPosition");
 	add_attribute(shader,"vertexColor");
 	add_attribute(shader,"vertexUV");
+	add_attribute(shader, "id");
 	fatalerror(link_shader(shader, vert, frag));
 	engine->shader = shader;
 	engine->camera = camera;
 	use_shader(shader);// debug
+
 	init_batch(engine->batch);
 	unuse_shader(shader);// debug
 	glCheckError();
@@ -90,20 +91,30 @@ int engine_draw(engine* engine)
 	glClearColor(0.f, 0.f, 0.082f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	use_shader(engine->shader);
-	glActiveTexture(GL_TEXTURE0);// tells u want to use texture unit 0	
+//	use_shader(engine->shader);
+////	glActiveTexture(GL_TEXTURE0);// tells u want to use texture unit 0	
+//	glCheckError();
+//	set_matrix(engine->shader,"P", &(engine->camera->cameraMatrix));
+//	GLint textureUniform = get_uniform_location(engine->shader, "mySamples");
+//	for(int i = 0; i < engine->spritecache->bindedTextures._max;i++)
+//	{
+//		glActiveTexture(GL_TEXTURE0 + i);
+//		glBindTexture(GL_TEXTURE_2D, engine->spritecache->bindedTextures.textures[i].ID);
+//		//printf("i%d  %d\n",i, engine->spritecache->bindedTextures.textures[i].ID);
+//	}
+//	//int* tes = (int*)calloc(30, sizeof(int));
+//	glUniform1iv(textureUniform, 30,engine->spritecache->bindedTextures.ids);
 	glCheckError();
-	set_matrix(engine->shader,"P", &(engine->camera->cameraMatrix));
-	GLint textureUniform = get_uniform_location(engine->shader, "mySampler");
-	glUniform1i(textureUniform, 0);
-#ifdef P_WINDOWS
-	ret += render_batch(engine->batch);
-#endif
+
+	ret += render_batch(engine->batch,engine->shader,engine->spritecache, &engine->camera->cameraMatrix);
+
 	glCheckError();
 	unuse_shader(engine->shader);
 	render_debug_lines(engine->drenderer,&engine->camera->cameraMatrix);
 	ret += 1;
 
+
+	//free(tes);
 	return ret;
 //	render_text(engine->text);
 }

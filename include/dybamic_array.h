@@ -4,6 +4,8 @@
 #include <functional>
 #include <utility>
 #define DEFAULT_SIZE
+#include <memsebug.h>
+
 constexpr uint32_t uint32x2Size = sizeof(uint32_t) * 2;
 //  todo implement swap uudestaan
 

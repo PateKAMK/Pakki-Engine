@@ -1,5 +1,6 @@
 #pragma once
 #include <projectDefinitions.h>
+#include <memsebug.h>
 
 #ifndef P_ANDROID
 

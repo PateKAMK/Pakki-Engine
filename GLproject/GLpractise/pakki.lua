@@ -51,6 +51,7 @@ ffi.cdef[[
     void update_objects();
     drawdata* load_picture(const char* path);
     void draw_line(float x1,float y1,float x2,float y2);
+    vec2 getMousePos();
 ]]
 print("FFI done correctly")
 
@@ -66,35 +67,44 @@ configure = {
     WorldHeight = 350,
 }
 
-
+objects = {}
+player = 0;
+numObjs = 0
 function initPakki()
     print("pakki inited from lua side")
-    local x = 10;
+
+    objects[numObjs] = {}
+    objects[numObjs].cdata = ffi.C.get_object_moving(0,0,40,40)
+    objects[numObjs].cdata[0].i = numObjs
+    objects[numObjs].cdata[0].drawPtr = ffi.C.load_picture("laatikko.jpg")
+    player = numObjs;
+    numObjs = numObjs + 1
+
+    print("here")
+    print("pakki inited from lua side")
+    for i = 1,10 do
+    objects[numObjs] = {}
+    objects[numObjs].cdata = ffi.C.get_object_static(-100 + i * 80,-80,10,10)
+    objects[numObjs].cdata[0].i = numObjs
+    objects[numObjs].cdata[0].drawPtr = ffi.C.load_picture("laatikko.jpg")
+    numObjs = numObjs + 1
+    end
+    
+    print("pakki inited from lua side")
+
 end
 
 currentTime = 0
 newX = 0
-numCalls = 0
-objects = {}
 function updatePakki(dt)
-    --print("here")
-    -- ffi.C.hello_world()
-    -- ffi.C.is_key_down('a');
-    ffi.C.draw_line(0,0,400,400)
+
+    local mpos = ffi.C.getMousePos();
+    print(mpos.x, mpos.y)
     currentTime = currentTime + dt
     if(ffi.C.is_key_activated("w"))then
-        numCalls = numCalls + 1
-        objects[numCalls] = ffi.C.get_object_static(newX,0,40,40) 
-        print("REEEEEEEEEE")
-        objects[numCalls][0].i = numCalls
-        newX = newX + 40
-        objects[numCalls][0].drawPtr = ffi.C.load_picture("laatikko.jpg")
-        objects[numCalls][0].drawPtr[0].level = numCalls
-        print(numCalls)
+       print("w pressed")
     end
-    if(ffi.C.is_key_down("w")) then
-    --    ffi.C.draw_box(0,0,50,50,0.5) 
-    end
+
     if(ffi.C.is_key_activated("a"))then
         print("a pressed" ,currentTime)
     end
@@ -104,12 +114,11 @@ function updatePakki(dt)
     if(ffi.C.is_key_activated("d"))then
         print("d pressed" ,currentTime)
     end
-    --print("updating pakki", currentTime)
-    local x = 10;
     ffi.C.update_objects();
-    print(#objects)
     for i = 1,#objects do
-        ffi.C.draw_box(objects[i][0].pos.x,objects[i][0].pos.y,objects[i][0].dim.x,objects[i][0].dim.y,0)
+       ffi.C.draw_box(objects[i].cdata[0].pos.x,objects[i].cdata[0].pos.y,objects[i].cdata[0].dim.x,objects[i].cdata[0].dim.y,0)
     end
     return 1
 end
+
+

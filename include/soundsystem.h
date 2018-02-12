@@ -8,6 +8,8 @@
 
 #include <fmod.hpp>
 #include <fmod_errors.h>
+#include <memsebug.h>
+
 class soundsystem {
 
 private:

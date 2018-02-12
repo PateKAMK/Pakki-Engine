@@ -5,6 +5,8 @@
 #include<glm\glm\gtc\matrix_transform.hpp>
 #include<glm\glm\gtc\type_ptr.hpp>
 #include <shader.h>
+#include <memsebug.h>
+
 struct character_info {
 	float ax; // advance.x
 	float ay; // advance.y

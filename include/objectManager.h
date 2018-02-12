@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <spritebatch.h>
 #include <arrayD.h>
+#include <memsebug.h>
 
 namespace ObjectManager
 {

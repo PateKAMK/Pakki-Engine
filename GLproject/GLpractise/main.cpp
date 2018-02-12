@@ -1,5 +1,4 @@
-#include "engine.h"
-#include "window.h"
+﻿#include "engine.h"
 #include <glad/glad.h>
 #include <glfw3.h>
 #include <cstdio>
@@ -10,10 +9,10 @@
 #include <soundsystem.h>
 #include <pakki.h>
 #include <objectManager.h>
+#include <iostream>
 #define SOL_CHECK_ARGUMENTS 1
 #include <sol.hpp>
-#include<map>
-#include<string>
+
 #include<filesystem.h>
 #define FILEID 10
 static input inputs;
@@ -28,7 +27,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 static bool esc = false;
-static keys* k;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if(action == GLFW_PRESS)
@@ -60,11 +58,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	}
 }
 
-struct spriteCache
-{
-	spriteCache() = default;
-	std::map<std::string, Texture> sprites;
-};
 static spriteCache* luasprites;
 
 #define EXPORT extern "C" __declspec(dllexport)
@@ -169,21 +162,88 @@ EXPORT bool is_key_activated(const char key[])
 		break;
 	}
 }
+EXPORT ObjectManager::vec2 getMousePos()
+{
+	return ObjectManager::vec2{ inputs.xWorld, inputs.yWorld };
+}
 
 
+struct collisionMap 
+{
+	unsigned char* textureData;
+	unsigned char* collisionData;
+	bool update;
+	int texwidht;
+	int texheight;
+	int spriteid;
+	float posX;
+	float posY;
+	float widht;
+	float height;
+};
+GLuint TESTID = 100;
+int TESTWIDHT = 0;
+int TESTHEIGHT = 0;
 
 Texture* load_sprite(spriteCache* cache,const char* path)
 {
+	Texture* ret = NULL;
 	auto tex = cache->sprites.find(path);
 	if(tex == cache->sprites.end())
 	{
 		Texture t = FileSystem::load_sprite_io(path);
-		cache->sprites.insert(std::make_pair(path,t));
-		return &t;
+		assert(cache->bindedTextures._max < 29);
+		/*glActiveTexture(GL_TEXTURE0 + cache->bindedTextures._max);
+		glBindTexture(GL_TEXTURE_2D, t.ID);*/
+		cache->bindedTextures.ids[cache->bindedTextures._max] = cache->bindedTextures._max;
+		cache->bindedTextures.textures[cache->bindedTextures._max] = t;
+	/*	TESTID = t.ID;
+		TESTHEIGHT = t.height;
+		TESTWIDHT = t.widht;*/
+		t.ID = cache->bindedTextures._max++;
+		printf("cpp id = %d\n", t.ID);
+		auto r = cache->sprites.insert(std::make_pair(path,t));
+		ret = &r.first->second;
 	}
-	return &tex->second;
+	else
+	{
+		ret = &tex->second;
+	}
+	return ret;
 }
+void reloadCollisionMap(collisionMap* map,spriteCache* cache)
+{
+	Texture newTexture = FileSystem::reload_texture(cache->bindedTextures.textures[map->spriteid].ID, map->textureData, map->texwidht, map->texheight);
+	cache->bindedTextures.textures[map->spriteid].ID = newTexture.ID;
+}
+void load_collisionmap(collisionMap* map,const char* path, spriteCache* cache)
+{
+	Texture t = FileSystem::load_sprite_to_buffer(path, &map->textureData);
 
+	assert(cache->bindedTextures._max < 29);
+
+	cache->bindedTextures.ids[cache->bindedTextures._max] = cache->bindedTextures._max;
+	cache->bindedTextures.textures[cache->bindedTextures._max] = t;
+	t.ID = cache->bindedTextures._max++;
+	printf("cpp id = %d\n", t.ID);
+	auto r = cache->sprites.insert(std::make_pair(path, t));
+	
+
+
+	map->spriteid = t.ID;
+	map->texheight = t.height;
+	map->texwidht = t.widht;
+	map->collisionData = (unsigned char*)calloc(t.height*t.widht, sizeof(unsigned char));
+	int k = 0;
+	for(int i = 4; i < t.height*t.widht / 4;i += 4)
+	{
+		if(map->textureData[i] != 0)
+		{ 
+			map->collisionData[k] = 1;
+		}
+		k++;
+	}
+}
 EXPORT  ObjectManager::drawdata* load_picture(const char* path)
 {
 	ObjectManager::drawdata* data = luaobjs->drawPool.new_item();
@@ -199,6 +259,7 @@ EXPORT void update_objects()
 }
 
 
+
 int main(int argc, const char **argv)
 {
 	sol::state lua;
@@ -207,9 +268,38 @@ int main(int argc, const char **argv)
 	sol::table pakki_table = lua.create_named_table("Pakki");
 	sol::table meta = lua.create_table_with();
 
+
+
+
+
 	ObjectManager::objects Objects;
 	luaobjs = &Objects;
-		lua.script_file("pakki.lua");
+
+	sol::load_result lr = lua.load_file("pakki.lua");
+
+
+	if (!lr.valid()) { // This checks the syntax of your script, but does not execute it
+		sol::error err = lr;
+		std::string what = err.what();
+		std::cout << "call failed, sol::error::what() is " << what << std::endl;
+		getchar();
+	}
+	else
+	{
+		sol::protected_function_result result1 = lr(); // this causes the script to execute
+		if (!result1.valid()) {
+			sol::error err = result1;
+			std::string what = err.what();
+			std::cout << "call failed, sol::error::what() is " << what << std::endl;
+			getchar();
+		}
+		else
+			std::cout << "OK" << std::endl;
+	}
+
+
+
+	//lua.script_file("pakki.lua");
 
 
 	auto con = lua["configure"];
@@ -280,7 +370,6 @@ int main(int argc, const char **argv)
 	//engine.text = &font;
 	engine.height = h;
 	engine.widht = w;
-	::k = &engine.key;
 	engine_init(&engine,&camera,&shader,WorldX,WorldY,worldW,worldH);
 	int num_draw_calls = 0;
 	init_inputs(&inputs);
@@ -301,11 +390,21 @@ int main(int argc, const char **argv)
 	float updating = 0;
 	float currentFps = 0;
 	int index = 0;
-	bool pause = true;
+	bool pause = false;
 	bool debuglines = false;
 	spriteCache Sprites;
 	luasprites = &Sprites;
-	lua["initPakki"]();
+	engine.spritecache = &Sprites;
+
+	try
+	{
+		lua["initPakki"]();
+	}
+	catch(const sol::error& err)
+	{
+		std::cout << "Caught sol error" <<err.what() <<std::endl;
+		getchar();
+	}
 	auto luaUpdate = lua["updatePakki"];
 	bool stopgame = false;
 	while(!glfwWindowShouldClose(window))
@@ -385,10 +484,25 @@ int main(int argc, const char **argv)
 			t += dt;
 			if(!pause)
 			{
-				int suc = luaUpdate(dt);
+				int suc = 0;
+				try
+				{
+					suc = luaUpdate(dt);
+				}
+				catch (const sol::error& err)
+				{
+					std::cout << "Caught sol error" << err.what() << std::endl;
+					getchar();
+				}
 				if (!suc) stopgame = true;
 				draw_debug_box(engine.drenderer, WorldX - worldW, WorldY - worldH, worldW * 2, worldH *2, 0);
-				
+				if (TESTID != 100)
+				{
+					//unsigned char* tester = (unsigned char*)malloc(sizeof(unsigned char)* TESTWIDHT*TESTHEIGHT);
+					/*GLubyte* tester = (GLubyte*)malloc(sizeof(GLubyte) * 100 * 100 * 4);
+
+					glGetTexImage(GL_TEXTURE_2D, 0 ​, GL_RGBA, GL_UNSIGNED_BYTE,  tester)*/;
+				}
 				engine_events(&engine, dt,currentFps);
 			}
 			update_keys(&inputs);
@@ -402,6 +516,7 @@ int main(int argc, const char **argv)
 	ObjectManager::dispose_objects(&Objects);
 	engine_clearup(&engine);
 	dispose_inputs(&inputs);
+	dispose_pakki(&context);
 	//clear up engine
 	glfwTerminate();
 	return pass;

@@ -1,5 +1,5 @@
 #include "spritebatch.h"
-
+#include <stdio.h>
 #ifdef P_ANDROID
 #include <android/log.h>
 #include <engine.h>
@@ -23,18 +23,31 @@ void init_batch(SpriteBatch* batch)//tee ebo
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
 
+	
 	//this is the position attribute pointer
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 	//this is the color attribute pointer
 	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, color));
 	//uv atrrib pointer
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv)); // pistä position kanssa ?
+	//texid
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureid)); 
 	glBindVertexArray(0);
 
-	allocate_new_array<Glyph>(&(batch->dynArrGlyphs));
-	allocate_new_array<RenderBatch>(&(batch->dynArrRenderBatches));
-	allocate_new_array<Glyph*>(&(batch->dynArrSortingGlyphs));	
+
+	batch->sortingGlyphs.init_array(50);
+	//batch->renderbatches.init_array(50);
+	batch->glyphs.init_array(50);
+	batch->VertexBuffer.init_array(50);
+	batch->numVerts = 0;
+	for (int i = 0; i < 30; i++) 
+	{
+		batch->bindableTextures[i] = i;
+		batch->bindtextures[i] = -1;
+	}
+	batch->numTexturesToBind = 0;
 }
 #endif
 #ifdef P_ANDROID
@@ -51,9 +64,17 @@ void init_batch(SpriteBatch* batch)//tee ebo
 void begin(SpriteBatch* batch)
 {
 	//glypsh clear
-	clear_array<Glyph>(batch->dynArrGlyphs);
+	batch->glyphs.clear_array();
+	batch->sortingGlyphs.clear_array();
+	batch->VertexBuffer.clear_array();
+	batch->numVerts = 0;
+	batch->numTexturesToBind = 0;
+	for (int i = 0; i < 30; i++)
+	{
+		batch->bindtextures[i] = -1;
+	}
+	//batch->renderbatches.clear_array();
 	//renderbatches clear
-	clear_array<RenderBatch>(batch->dynArrRenderBatches);
 }
 inline glm::vec2 rotatePoint(glm::vec2 point, float angle)
 {
@@ -65,9 +86,10 @@ inline glm::vec2 rotatePoint(glm::vec2 point, float angle)
 
 void push_to_batch(SpriteBatch* batch,const glm::vec4* destinationRectangle, const glm::vec4* uvRectangle, GLuint texture, const Color* color, float depth,float angle /*= 0*/)
 {
-	Glyph temp{texture,depth};
-	temp.texture = texture;
-	temp.depth = depth;
+	Glyph* temp = batch->glyphs.get_new_item();
+
+	temp->texture = texture;
+	temp->depth = depth;
 
 	if(angle !=0)
 	{
@@ -82,124 +104,180 @@ void push_to_batch(SpriteBatch* batch,const glm::vec4* destinationRectangle, con
 		t3 = rotatePoint(t3, angle) + halfDims;
 		t4 = rotatePoint(t4, angle) + halfDims;
 
-		temp.topLeft.color = *color;
-		temp.topLeft.position = glm::vec2(destinationRectangle->x +t1.x, destinationRectangle->y + t1.y);
-		temp.topLeft.uv = glm::vec2(uvRectangle->x, uvRectangle->y + uvRectangle->w);
+		temp->topLeft.color = *color;
+		temp->topLeft.position = glm::vec2(destinationRectangle->x +t1.x, destinationRectangle->y + t1.y);
+		temp->topLeft.uv = glm::vec2(uvRectangle->x, uvRectangle->y + uvRectangle->w);
+		temp->topLeft.textureid = texture;
 
-		temp.bottomLeft.color = *color;
-		temp.bottomLeft.position = glm::vec2(destinationRectangle->x + t2.x, destinationRectangle->y + t2.y);
-		temp.bottomLeft.uv = glm::vec2(uvRectangle->x, uvRectangle->y);
+		temp->bottomLeft.color = *color;
+		temp->bottomLeft.position = glm::vec2(destinationRectangle->x + t2.x, destinationRectangle->y + t2.y);
+		temp->bottomLeft.uv = glm::vec2(uvRectangle->x, uvRectangle->y);
+		temp->bottomLeft.textureid = texture;
 
-		temp.bottomRight.color = *color;
-		temp.bottomRight.position = glm::vec2(destinationRectangle->x + +t3.x, destinationRectangle->y + t3.y);
-		temp.bottomRight.uv = glm::vec2(uvRectangle->x + uvRectangle->z, uvRectangle->y);
 
-		temp.topRight.color = *color;
-		temp.topRight.position = glm::vec2(destinationRectangle->x + +t4.x, destinationRectangle->y + t4.y);
-		temp.topRight.uv = glm::vec2(uvRectangle->x + uvRectangle->z, uvRectangle->y + uvRectangle->w);
+		temp->bottomRight.color = *color;
+		temp->bottomRight.position = glm::vec2(destinationRectangle->x + +t3.x, destinationRectangle->y + t3.y);
+		temp->bottomRight.uv = glm::vec2(uvRectangle->x + uvRectangle->z, uvRectangle->y);
+		temp->bottomRight.textureid = texture;
 
-		push_back_dyn_array<Glyph>(&(batch->dynArrGlyphs), &temp);
+
+		temp->topRight.color = *color;
+		temp->topRight.position = glm::vec2(destinationRectangle->x + +t4.x, destinationRectangle->y + t4.y);
+		temp->topRight.uv = glm::vec2(uvRectangle->x + uvRectangle->z, uvRectangle->y + uvRectangle->w);
+		temp->topRight.textureid = texture;
 	}
 	else 
 	{
-		temp.topLeft.color = *color;
-		temp.topLeft.position = glm::vec2(destinationRectangle->x, destinationRectangle->y + destinationRectangle->w);
-		temp.topLeft.uv = glm::vec2(uvRectangle->x, uvRectangle->y + uvRectangle->w);
+		temp->topLeft.color = *color;
+		temp->topLeft.position = glm::vec2(destinationRectangle->x, destinationRectangle->y + destinationRectangle->w);
+		temp->topLeft.uv = glm::vec2(uvRectangle->x, uvRectangle->y + uvRectangle->w);
+		temp->topLeft.textureid = texture;
 
-		temp.bottomLeft.color = *color;
-		temp.bottomLeft.position = glm::vec2(destinationRectangle->x, destinationRectangle->y);
-		temp.bottomLeft.uv = glm::vec2(uvRectangle->x, uvRectangle->y );
 
-		temp.bottomRight.color = *color;
-		temp.bottomRight.position = glm::vec2(destinationRectangle->x + destinationRectangle->z, destinationRectangle->y);
-		temp.bottomRight.uv = glm::vec2(uvRectangle->x + uvRectangle->z, uvRectangle->y);
+		temp->bottomLeft.color = *color;
+		temp->bottomLeft.position = glm::vec2(destinationRectangle->x, destinationRectangle->y);
+		temp->bottomLeft.uv = glm::vec2(uvRectangle->x, uvRectangle->y );
+		temp->bottomLeft.textureid = texture;
 
-		temp.topRight.color = *color;
-		temp.topRight.position = glm::vec2(destinationRectangle->x + destinationRectangle->z, destinationRectangle->y + destinationRectangle->w);
-		temp.topRight.uv = glm::vec2(uvRectangle->x + uvRectangle->z, uvRectangle->y + uvRectangle->w);
 
-		push_back_dyn_array<Glyph>(&(batch->dynArrGlyphs), &temp);
+		temp->bottomRight.color = *color;
+		temp->bottomRight.position = glm::vec2(destinationRectangle->x + destinationRectangle->z, destinationRectangle->y);
+		temp->bottomRight.uv = glm::vec2(uvRectangle->x + uvRectangle->z, uvRectangle->y);
+		temp->bottomRight.textureid = texture;
+
+
+		temp->topRight.color = *color;
+		temp->topRight.position = glm::vec2(destinationRectangle->x + destinationRectangle->z, destinationRectangle->y + destinationRectangle->w);
+		temp->topRight.uv = glm::vec2(uvRectangle->x + uvRectangle->z, uvRectangle->y + uvRectangle->w);
+		temp->topRight.textureid = texture;
+
+	}
+	bool insert = true;
+	for (int i = 0; i < 30; i++) 
+	{
+		if(batch->bindtextures[i] == texture)
+		{
+			insert = false;
+			break;
+		}
+	}
+	if(insert)
+	{
+		batch->bindtextures[batch->numTexturesToBind++] = texture;
 	}
 }
 void create_render_batches(SpriteBatch* batch)
 {
-	if (get_array_size(batch->dynArrSortingGlyphs) == 0) return;
-	Vertex* dynArrVert;
-	allocate_new_array<Vertex>(&dynArrVert/* get_array_size(batch->dynArrSortingGlyphs)*/);
-	resize_array<Vertex>(&dynArrVert, get_array_size(batch->dynArrSortingGlyphs) * 6);
-
+	if (batch->sortingGlyphs._size == 0) return;
+	batch->VertexBuffer.clear_array();
+	batch->VertexBuffer.resize_array(batch->sortingGlyphs._size * 6);
 	int offset = 0;
 	int cv = 0;
 
-	RenderBatch *temp = emblace_back<RenderBatch>(&batch->dynArrRenderBatches);
-	temp->numVertices = 6;
-	temp->offset = 0;
-	temp->texture = batch->dynArrSortingGlyphs[0]->texture;
+	//RenderBatch* temp = batch->renderbatches.get_new_item();
 
-	dynArrVert[cv++] = batch->dynArrSortingGlyphs[0]->topLeft;
-	dynArrVert[cv++] = batch->dynArrSortingGlyphs[0]->bottomLeft;
-	dynArrVert[cv++] = batch->dynArrSortingGlyphs[0]->bottomRight;
-	dynArrVert[cv++] = batch->dynArrSortingGlyphs[0]->bottomRight;
-	dynArrVert[cv++] = batch->dynArrSortingGlyphs[0]->topRight;
-	dynArrVert[cv++] = batch->dynArrSortingGlyphs[0]->topLeft;
+	//temp->numVertices = 6;
+	//temp->offset = 0;
+	//temp->texture = batch->sortingGlyphs.data[0]->texture;  
+	batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[0]->topLeft;
+	batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[0]->bottomLeft;
+	batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[0]->bottomRight;
+	batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[0]->bottomRight;
+	batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[0]->topRight;
+	batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[0]->topLeft;
 	offset += 6;
 
-	for (int cg = 1; cg < get_array_size(batch->dynArrSortingGlyphs); cg++)
+	for (int cg = 1; cg <  batch->sortingGlyphs._size; cg++)
 	{
-		if (batch->dynArrSortingGlyphs[cg]->texture != batch->dynArrSortingGlyphs[cg - 1]->texture) // if tecture is different we will place new render patch
-		{
-			//_renderBatches.emplace_back(offset, 6, _sortingGlyphs[cg]->texture); // get 6 vertecies
-			RenderBatch *temp = emblace_back<RenderBatch>(&batch->dynArrRenderBatches);
-			temp->numVertices = 6;
-			temp->offset = offset;
-			temp->texture = batch->dynArrSortingGlyphs[cg]->texture;
-		}
-		else
-		{
-			get_back<RenderBatch>(batch->dynArrRenderBatches)->numVertices += 6;// saattaa mennä riki kun väärä arvo palautetaan HOX
-			//_renderBatches.back().numVertices += 6;
-		}
-		dynArrVert[cv++] = batch->dynArrSortingGlyphs[cg]->topLeft;
-		dynArrVert[cv++] = batch->dynArrSortingGlyphs[cg]->bottomLeft;
-		dynArrVert[cv++] = batch->dynArrSortingGlyphs[cg]->bottomRight;
-		dynArrVert[cv++] = batch->dynArrSortingGlyphs[cg]->bottomRight;
-		dynArrVert[cv++] = batch->dynArrSortingGlyphs[cg]->topRight;
-		dynArrVert[cv++] = batch->dynArrSortingGlyphs[cg]->topLeft;
+		//if (batch->sortingGlyphs.data[cg]->texture != batch->sortingGlyphs.data[cg - 1]->texture) // if tecture is different we will place new render patch
+		//{
+		//	//_renderBatches.emplace_back(offset, 6, _sortingGlyphs[cg]->texture); // get 6 vertecies
+		//	RenderBatch *temp = emblace_back<RenderBatch>(&batch->dynArrRenderBatches);
+		//	temp->numVertices = 6;
+		//	temp->offset = offset;
+		//	temp->texture = batch->sortingGlyphs.data[cg]->texture;
+		//}
+		//else
+		//{
+		//	get_back<RenderBatch>(batch->dynArrRenderBatches)->numVertices += 6;// saattaa mennä riki kun väärä arvo palautetaan HOX
+		//	//_renderBatches.back().numVertices += 6;
+		//}
+
+		batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[cg]->topLeft;
+		batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[cg]->bottomLeft;
+		batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[cg]->bottomRight;
+		batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[cg]->bottomRight;
+		batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[cg]->topRight;
+		batch->VertexBuffer.data[cv++] = batch->sortingGlyphs.data[cg]->topLeft;
 
 		offset += 6;
 	}
-
+	//for(int i = 0; i < batch->VertexBuffer._size;i++)
+	//{
+	//	printf("%d    %f %f \n", batch->VertexBuffer.data[i].position.x, batch->VertexBuffer.data[i].position.y);
+	//}
 	glBindBuffer(GL_ARRAY_BUFFER, batch->vbo);
 	//orphan the buffer
-	glBufferData(GL_ARRAY_BUFFER, get_array_size(dynArrVert) * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, batch->VertexBuffer._size * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 	//upload the data
-	glBufferSubData(GL_ARRAY_BUFFER, 0, get_array_size(dynArrVert) * sizeof(Vertex), dynArrVert);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, batch->VertexBuffer._size * sizeof(Vertex), batch->VertexBuffer.data);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	free_dyn_array<Vertex>(dynArrVert);
+	batch->numVerts = batch->VertexBuffer._size;
+	batch->VertexBuffer.clear_array();
 }
 void post_batch_process(SpriteBatch* batch)
 {
-	resize_array<Glyph*>(&(batch->dynArrSortingGlyphs), get_array_size(batch->dynArrGlyphs));
-
-	for (int i = 0; i < get_array_size(batch->dynArrGlyphs); i++)
+	//resize_array<Glyph*>(&(batch->dynArrSortingGlyphs), get_array_size(batch->dynArrGlyphs));
+	batch->sortingGlyphs.clear_array();
+	batch->sortingGlyphs.resize_array(batch->glyphs._size);
+	for (int i = 0; i < batch->glyphs._size; i++)
 	{
-		batch->dynArrSortingGlyphs[i] = &(batch->dynArrGlyphs[i]);
+		batch->sortingGlyphs.data[i] = &batch->glyphs.data[i];
 	}
-	quick_sort_array<Glyph*>(batch->dynArrSortingGlyphs, 0, get_array_size(batch->dynArrSortingGlyphs), [](Glyph** lhv, Glyph** rhv) {return (*lhv)->texture < (*rhv)->texture; });
+	batch->sortingGlyphs.quick_sort(0, batch->sortingGlyphs._size, [](Glyph** lhv, Glyph** rhv) {return (*lhv)->depth < (*rhv)->depth; });
+	//quick_sort_array<Glyph*>(batch->dynArrSortingGlyphs, 0, get_array_size(batch->dynArrSortingGlyphs), [](Glyph** lhv, Glyph** rhv) {return (*lhv)->texture < (*rhv)->texture; });
+
+
+
 	create_render_batches(batch);
 }
 #ifdef P_WINDOWS
-int render_batch(SpriteBatch *batch)
+int render_batch(SpriteBatch *batch,Shader* shader,spriteCache* cache,glm::mat4x4* camMatrix)
 {
+	if (batch->numVerts == 0) return 0;
+
+
+	use_shader(shader);
+	//	glActiveTexture(GL_TEXTURE0);// tells u want to use texture unit 0	
+	//glCheckError();
+	set_matrix(shader, "P", camMatrix);
+	GLint textureUniform = get_uniform_location(shader, "mySamples");
+
+	for(int i = 0; i < batch->numTexturesToBind;i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + batch->bindtextures[i]);
+		glBindTexture(GL_TEXTURE_2D, cache->bindedTextures.textures[batch->bindtextures[i]].ID);
+	}
+	//int* tes = (int*)calloc(30, sizeof(int));
+	glUniform1iv(textureUniform, 30, batch->bindableTextures);
+
+
+
+
+
+
 	int ret = 0;
 	glBindVertexArray(batch->vao);
-	for (int i = 0; i < get_array_size(batch->dynArrRenderBatches); i++)
-	{
-		ret++;
-		glBindTexture(GL_TEXTURE_2D, batch->dynArrRenderBatches[i].texture);
-		glDrawArrays(GL_TRIANGLES, batch->dynArrRenderBatches[i].offset, batch->dynArrRenderBatches[i].numVertices);
-	}
+	glDrawArrays(GL_TRIANGLES,0,batch->numVerts);
+	//for (int i = 0; i < get_array_size(batch->dynArrRenderBatches); i++)
+	//{
+	//	ret++;
+	//	glBindTexture(GL_TEXTURE_2D, batch->dynArrRenderBatches[i].texture);
+	//	glDrawArrays(GL_TRIANGLES, batch->dynArrRenderBatches[i].offset, batch->dynArrRenderBatches[i].numVertices);
+	//}
+	//batch->numVerts = 0;
+
 	glBindVertexArray(0);
 	return ret;
 }
@@ -243,9 +321,12 @@ void render_batch(SpriteBatch *batch)
 #ifdef P_WINDOWS
 void dispose_batch(SpriteBatch *batch)
 {
-	free_dyn_array(batch->dynArrGlyphs);
-	free_dyn_array(batch->dynArrRenderBatches);
-	free_dyn_array(batch->dynArrSortingGlyphs);
+	//free_dyn_array(batch->dynArrGlyphs);
+	//free_dyn_array(batch->dynArrRenderBatches);
+	//free_dyn_array(batch->dynArrSortingGlyphs);
+	batch->glyphs.dispose_array();
+	batch->sortingGlyphs.dispose_array();
+	batch->VertexBuffer.dispose_array();
 	if (batch->vao != 0) {
 		glDeleteVertexArrays(1, &batch->vao);
 		batch->vao = 0;

@@ -8,6 +8,7 @@
 #endif //P_ANDROID
 #include "dybamic_array.h"
 #include <glm/glm/common.hpp>
+#include <memsebug.h>
 
 
 struct Shader
