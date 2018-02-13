@@ -84,7 +84,7 @@ function initPakki()
     print("pakki inited from lua side")
     for i = 1,10 do
     objects[numObjs] = {}
-    objects[numObjs].cdata = ffi.C.get_object_static(-100 + i * 80,-80,10,10)
+    objects[numObjs].cdata = ffi.C.get_object_static(-100 + i * 80,-80,50,50)
     objects[numObjs].cdata[0].i = numObjs
     objects[numObjs].cdata[0].drawPtr = ffi.C.load_picture("laatikko.jpg")
     numObjs = numObjs + 1

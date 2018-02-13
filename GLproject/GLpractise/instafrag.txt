@@ -1,7 +1,7 @@
 #version 330 core
 
 
-in vec2 uv;
+in vec2 _uv;
   
 uniform sampler2D mySampler;
 
@@ -11,5 +11,5 @@ out vec4 color;
 
 void main()
 {
-	color = texture2D(mySampler,uv);
+	color = texture2D(mySampler,_uv);//vec4(1,1,1,1);//texture2D(mySampler,_uv);
 }

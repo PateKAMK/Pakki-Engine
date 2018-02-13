@@ -279,6 +279,7 @@ int render_batch(SpriteBatch *batch,Shader* shader,spriteCache* cache,glm::mat4x
 	//batch->numVerts = 0;
 
 	glBindVertexArray(0);
+	unuse_shader(shader);
 	return ret;
 }
 #endif

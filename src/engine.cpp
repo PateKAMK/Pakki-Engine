@@ -14,9 +14,9 @@
 
 #endif //P_ANDROID
 //
-
-
-
+#include <InstancedRenderer.h>
+#include <perlinnoice.h>
+static InRender::instaRenderer inrend;
 GLenum glCheckError_(const char *file, int line)
 {
 	GLenum errorCode;
@@ -82,6 +82,10 @@ void engine_init(engine* engine,Camera* camera,Shader* shader, float WorldX, flo
 #ifndef OUT_OF_DATE
 	init_entities(&engine->objects, engine,engine->drenderer);
 #endif // !OUT_OF_DATE
+
+
+	InRender::init_renderer(&inrend);
+
 	LOGI("engine inited\n");
 }
 //#ifdef P_WINDOWS
@@ -109,22 +113,22 @@ int engine_draw(engine* engine)
 	ret += render_batch(engine->batch,engine->shader,engine->spritecache, &engine->camera->cameraMatrix);
 
 	glCheckError();
-	unuse_shader(engine->shader);
-	render_debug_lines(engine->drenderer,&engine->camera->cameraMatrix);
+	//render_debug_lines(engine->drenderer,&engine->camera->cameraMatrix);
 	ret += 1;
-
+	InRender::render(&inrend, engine->spritecache->bindedTextures.textures[0].ID, &engine->camera->cameraMatrix);
+	glCheckError();
 
 	//free(tes);
 	return ret;
 //	render_text(engine->text);
 }
-
-struct entitity
-{
-	GLuint texid;
-	glm::vec2 pos;
-	glm::vec2 dim;
-};
+//
+//struct entitity
+//{
+//	GLuint texid;
+//	glm::vec2 pos;
+//	glm::vec2 dim;
+//};
 
 void engine_events(engine* engine, double deltaTime, float fps)
 {
@@ -145,8 +149,34 @@ void engine_events(engine* engine, double deltaTime, float fps)
 	ObjectManager::draw_objects(&engine->objs->drawAbleOnes, engine->batch);
 	post_batch_process(engine->batch);
 	populate_debugrender_buffers(engine->drenderer);
+	tileId* mesh = NULL;
+	generate_mesh(&mesh);
+	for (float h = 0; h < 100; h++)
+	{
+		for (float w = 0; w < 100; w++)
+		{
+			if (mesh[(int)((w*h) + w)] == 0) continue;
 
+			float scale = 4;
+			float uv = 0;
+			float rw = w * scale - 100;
+			float rh = h * scale - 100;
 
+			InRender::push_to_renderer(&inrend, &rw, &rh, &scale, &uv, &uv, &scale, &scale);
+
+		}
+	}
+
+		free(mesh);
+	/*for(int i = 0 ; i < 4 ;i++)
+	{
+		float k = 0 - i * 200;
+		float k1 = 0;
+		float k11 = 1;
+		float scale = 100;
+		InRender::push_to_renderer(&inrend, &k , &k1, &scale, &k1, &k1, &k11,&k11);
+	}*/
+	InRender::create_buffers(&inrend);
 	update_camera(engine->camera);
 }
 

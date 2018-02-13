@@ -1,18 +1,26 @@
 #version 330 core
 
 
-in (location = 0)vec2 uv;
-in (location = 1)vec2 vert;
-in (location = 2)vec2 pos;
-in (location = 3)float scale;
-
-in vec2 vert;
+layout (location = 0) in vec2 uv;
+layout (location = 1) in vec2 vert;
+layout (location = 2) in vec2 pos;
+layout (location = 3) in float scale;
 
 
+uniform mat4 P;
 
+out vec2 _uv;
 
 
 void main()
 {
+	vec2 position = (vert*scale) + pos;
+	gl_Position.xy = (P * vec4(position, 0.0, 1.0)).xy;
+	gl_Position.z = 0.0;    
+    gl_Position.w = 1.0;
 	
+	
+	
+	
+	_uv = vec2(uv.x, 1.0 - uv.y);//uv;
 }
