@@ -4,6 +4,15 @@
 
 namespace InRender
 {
+	static const GLfloat g_vertex_buffer_data[] = {
+		-0.05f,  0.05f,
+		0.05f, -0.05f,
+		-0.05f, -0.05f,
+
+		-0.05f,  0.05f,
+		0.05f, -0.05f, 
+		0.05f,  0.05f, 
+	};
 
 	void init_renderer(instaRenderer *in)
 	{
@@ -33,67 +42,127 @@ namespace InRender
 		add_attribute(&in->instaShader, "VertexUv");
 		fatalerror(link_shader(&in->instaShader, vert, frag));
 
+
+
+
+
 		glGenVertexArrays(1, &(in->vao));
 		glBindVertexArray(in->vao);
 
-		glGenBuffers(1, &in->vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, in->vbo);
+		glGenBuffers(1, &in->position);
+		glBindBuffer(GL_ARRAY_BUFFER, in->position);
+
+		glBufferData(GL_ARRAY_BUFFER, 1000 * sizeof(inVertex), NULL, GL_DYNAMIC_DRAW);// bind later  positions + scale
+
+		glGenBuffers(1, &in->uv);
+		glBindBuffer(GL_ARRAY_BUFFER, in->uv);
+
+		glBufferData(GL_ARRAY_BUFFER, 10000 * sizeof(inVertex), NULL, GL_DYNAMIC_DRAW);// bind later  uv for each vertex
+
+
+		glGenBuffers(1, &in->vertex);
+		glBindBuffer(GL_ARRAY_BUFFER, in->vertex);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);//bind now	vertex data
+
+
+
+
 
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 
-		//this is the position attribute pointer
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(inVertex, pos));
 		//this is the uv attribute pointer
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(inVertex, uv));
+		glBindBuffer(GL_ARRAY_BUFFER, in->uv);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), (void*)0);
+		//vertexposition
+		glBindBuffer(GL_ARRAY_BUFFER, in->vertex);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)0);
+		//position
+		glBindBuffer(GL_ARRAY_BUFFER, in->position);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(inVertex), (void*)offsetof(inVertex,pos));
+		//scale
+		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(inVertex), (void*)offsetof(inVertex, scale));
+
+
+		//this is the uv attribute pointer
+		//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(inVertex, uv));
 		
 		glBindVertexArray(0);
 
-		in->vertexbuffer.init_array(1000);
+		in->positionbuffer.init_array(1000);
+		in->uvBuffer.init_array(10000);
 	}
 
-	void push_to_renderer(instaRenderer* in,const float* x,const float* y,const float* z,const float* w,const float* uv1,const float* uv2,const float* uv3,const float* uv4)
+	void push_to_renderer(instaRenderer* in, const float* x, const float* y, float scale, const float* uv1, const float* uv2, const float* uv3, const float* uv4)
 	{
-		inVertex* v1 = in->vertexbuffer.get_new_item();//topleft
+		inVertex* v1 = in->positionbuffer.get_new_item();//topleft
 		v1->pos.x = *x;
-		v1->pos.y = *y + *w;
-		v1->uv.x = *uv1;
-		v1->uv.y = *uv2 + *uv4;
-
-		inVertex* v2 = in->vertexbuffer.get_new_item();//bottom left
-		v2->pos.x = *x;
-		v2->pos.y = *y;
-		v2->uv.x = *uv1;
-		v2->uv.y = *uv2;
+		v1->pos.y = *y;
+		v1->scale = scale;
 
 
-		inVertex* v3 = in->vertexbuffer.get_new_item();//bottom right
-		v3->pos.x = *x + *z;
-		v3->pos.y = *y ;
-		v3->uv.x = *uv1 + *uv2;
-		v3->uv.y = *uv2;
+		vec2* u1 = in->uvBuffer.get_new_item();
+		u1->x = *uv1;
+		u1->x = *uv2 + *uv4;
+		vec2* u2 = in->uvBuffer.get_new_item();
+		u2->x = *uv1;
+		u2->y = *uv2;
+		vec2* u3 = in->uvBuffer.get_new_item();
+		u3->x = *uv1 + *uv2;
+		u3->y = *uv2;
+		vec2* u4 = in->uvBuffer.get_new_item();
+		*u4 = *u3;
+		vec2* u5 = in->uvBuffer.get_new_item();
+		u5->x = *uv1 + *uv2;
+		u5->y = *uv2 + *uv4;
+		vec2* u6 = in->uvBuffer.get_new_item();
+		*u6 = *u1;
+
+/*		v1->pos.x = *x;
+		v1->pos.y = *y + *w*/;
+		/*v1->uv.x = *uv1;
+		v1->uv.y = *uv2 + *uv4;*/
+
+	//	inVertex* v2 = in->vertexbuffer.get_new_item();//bottom left
+	//	/*v2->pos.x = *x;
+	//	v2->pos.y = *y*/;
+	//	/*v2->uv.x = *uv1;
+	//	v2->uv.y = *uv2;*/
 
 
-		inVertex* vcopy1 = in->vertexbuffer.get_new_item();//bottom left
-		*vcopy1 = *v3;
+	//	inVertex* v3 = in->vertexbuffer.get_new_item();//bottom right
+	///*	v3->pos.x = *x + *z;
+	//	v3->pos.y = *y ;
+	//	v3->uv.x = *uv1 + *uv2;
+	//	v3->uv.y = *uv2;*/
 
 
-		inVertex* v4 = in->vertexbuffer.get_new_item();//topright
-		v4->pos.x = *x + *z;
-		v4->pos.y = *y + *w;
-		v4->uv.x = *uv1 + *uv2;
-		v4->uv.y = *uv2 + *uv4;
+	//	inVertex* vcopy1 = in->vertexbuffer.get_new_item();//bottom left
+	//	/**vcopy1 = *v3;*/
 
-		inVertex* vcopy2 = in->vertexbuffer.get_new_item();
-		*vcopy2 = *v1;
+
+	//	inVertex* v4 = in->vertexbuffer.get_new_item();//topright
+	//	/*v4->pos.x = *x + *z;
+	//	v4->pos.y = *y + *w;
+	//	v4->uv.x = *uv1 + *uv2;
+	//	v4->uv.y = *uv2 + *uv4;*/
+
+	//	inVertex* vcopy2 = in->vertexbuffer.get_new_item();
+	//	/**vcopy2 = *v1;*/
 	}
 	void create_buffers(instaRenderer* in)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, in->vbo);
+		/*glBindBuffer(GL_ARRAY_BUFFER, in->vbo);
 		glBufferData(GL_ARRAY_BUFFER, in->vertexbuffer._size * sizeof(inVertex),nullptr , GL_DYNAMIC_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, in->vertexbuffer._size * sizeof(inVertex), in->vertexbuffer.data);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, in->vertexbuffer._size * sizeof(inVertex), in->vertexbuffer.data);*/
 
-		in->vertexbuffer.clear_array();
+		glBindBuffer(GL_ARRAY_BUFFER, in->position);
+		glBufferData(GL_ARRAY_BUFFER, 10000* 4 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+		glBufferSubData(GL_ARRAY_BUFFER, 0, in->positionbuffer._size * sizeof(inVertex), in->positionbuffer.data);
+
+
+
+		in->positionbuffer.clear_array();
 	}
 	void render(instaRenderer* in,GLuint tex)
 	{

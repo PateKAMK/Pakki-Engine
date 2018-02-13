@@ -9,10 +9,12 @@ namespace InRender
 		float x;
 		float y;
 	};
+	
 	struct inVertex
 	{
 		vec2 pos;
-		vec2 uv;
+		float scale;
+		//vec2 uv;
 	};
 
 
@@ -20,8 +22,11 @@ namespace InRender
 	{
 		Shader					instaShader;
 		GLuint					vao;
-		GLuint					vbo;
-		dynamicArray<inVertex>	vertexbuffer;
+		GLuint					position;
+		GLuint					vertex;
+		GLuint					uv;
+		dynamicArray<inVertex>	positionbuffer;
+		dynamicArray<vec2>		uvBuffer;
 	};
 
 	void init_renderer(instaRenderer *in);
