@@ -1,0 +1,18 @@
+#version 330 core
+
+
+in (location = 0)vec2 uv;
+in (location = 1)vec2 vert;
+in (location = 2)vec2 pos;
+in (location = 3)float scale;
+
+in vec2 vert;
+
+
+
+
+
+void main()
+{
+	
+}
