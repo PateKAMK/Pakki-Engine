@@ -151,19 +151,18 @@ void engine_events(engine* engine, double deltaTime, float fps)
 	populate_debugrender_buffers(engine->drenderer);
 	tileId* mesh = NULL;
 	generate_mesh(&mesh);
-	for (float h = 0; h < 100; h++)
+	for (float h = 0; h < 10; h++)
 	{
-		for (float w = 0; w < 100; w++)
+		for (float w = 0; w < 10; w++)
 		{
 			if (mesh[(int)((w*h) + w)] == 0) continue;
 
-			float scale = 4;
+			float scale = 40;
 			float uv = 0;
 			float rw = w * scale - 100;
 			float rh = h * scale - 100;
 
 			InRender::push_to_renderer(&inrend, &rw, &rh, &scale, &uv, &uv, &scale, &scale);
-
 		}
 	}
 

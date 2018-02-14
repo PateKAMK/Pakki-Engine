@@ -99,7 +99,7 @@ newX = 0
 function updatePakki(dt)
 
     local mpos = ffi.C.getMousePos();
-    print(mpos.x, mpos.y)
+   -- print(mpos.x, mpos.y)
     currentTime = currentTime + dt
     if(ffi.C.is_key_activated("w"))then
        print("w pressed")
