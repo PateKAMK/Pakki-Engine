@@ -70,6 +70,8 @@ configure = {
 objects = {}
 player = 0;
 numObjs = 0
+camposX = 0;
+camposY = 0;
 function initPakki()
     print("pakki inited from lua side")
 
@@ -101,17 +103,25 @@ function updatePakki(dt)
     local mpos = ffi.C.getMousePos();
    -- print(mpos.x, mpos.y)
     currentTime = currentTime + dt
-    if(ffi.C.is_key_activated("w"))then
+    if(ffi.C.is_key_down("w"))then
+        camposY = camposY + 2;
+        ffi.C.set_camera(camposX,camposY,1);
        print("w pressed")
     end
 
-    if(ffi.C.is_key_activated("a"))then
+    if(ffi.C.is_key_down("a"))then
+        camposX = camposX - 2;
+        ffi.C.set_camera(camposX,camposY,1);
         print("a pressed" ,currentTime)
     end
-    if(ffi.C.is_key_activated("s"))then
+    if(ffi.C.is_key_down("s"))then
+        camposY = camposY - 2;
+        ffi.C.set_camera(camposX,camposY,1);
         print("s pressed" ,currentTime)
     end
-    if(ffi.C.is_key_activated("d"))then
+    if(ffi.C.is_key_down("d"))then
+        camposX = camposX + 2;
+        ffi.C.set_camera(camposX,camposY,1);
         print("d pressed" ,currentTime)
     end
     ffi.C.update_objects();
