@@ -61,8 +61,8 @@ print("FFI done correctly")
 configure = {
     ScreenX = 1200,
     ScreenY = 800,
-    WorldX = 0,
-    WorldY = 0,
+    WorldX = 100,
+    WorldY = 100,
     WorldWidht = 500,
     WorldHeight = 350,
 }

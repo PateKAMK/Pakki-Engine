@@ -155,7 +155,7 @@ void engine_events(engine* engine, double deltaTime, float fps)
 	{
 		for (float w = 0; w < 100; w++)
 		{
-			if (mesh[(int)((w*h) + w)] == 0) continue;
+			if (mesh[(int)((h*100) + w)] == 0) continue;
 
 			float scale = 10;
 			float uv = 0;
