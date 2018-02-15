@@ -149,7 +149,7 @@ void engine_events(engine* engine, double deltaTime, float fps)
 	ObjectManager::draw_objects(&engine->objs->drawAbleOnes, engine->batch);
 	post_batch_process(engine->batch);
 	populate_debugrender_buffers(engine->drenderer);
-	tileId* mesh = NULL;
+	/*tileId* mesh = NULL;
 	generate_mesh(&mesh);
 	for (float h = 0; h < 100; h++)
 	{
@@ -166,7 +166,7 @@ void engine_events(engine* engine, double deltaTime, float fps)
 		}
 	}
 
-		free(mesh);
+		free(mesh);*/
 	/*for(int i = 0 ; i < 4 ;i++)
 	{
 		float k = 0 - i * 200;

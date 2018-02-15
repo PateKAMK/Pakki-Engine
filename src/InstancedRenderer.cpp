@@ -103,31 +103,31 @@ namespace InRender
 		in->uvBuffer.init_array(10000);
 	}
 	static int num  = 0;
-	void push_to_renderer(instaRenderer* in, const float* x, const float* y,const float* scale, const float* uv1, const float* uv2, const float* uv3, const float* uv4)
+	void push_to_renderer(instaRenderer* in, const float& x, const float& y,const float& scale, const float& uv1, const float& uv2, const float& uv3, const float& uv4)
 	{
 		num++;
 		inVertex* v1 = in->positionbuffer.get_new_item();//topleft
-		v1->pos.x = *x;
-		v1->pos.y = *y;
-		v1->scale = *scale;
+		v1->pos.x = x;
+		v1->pos.y = y;
+		v1->scale = scale;
 
 
 		vec2* u1 = in->uvBuffer.get_new_item();//top left
-		u1->x = *uv1;
-		u1->y = *uv2 + *uv4;
+		u1->x = uv1;
+		u1->y = uv2 + uv4;
 		vec2* u2 = in->uvBuffer.get_new_item();//bot left
-		u2->x = *uv1 + *uv3;
-		u2->y = *uv2;
+		u2->x = uv1 + uv3;
+		u2->y = uv2;
 		vec2* u3 = in->uvBuffer.get_new_item();//bot right
-		u3->x = *uv1;
-		u3->y = *uv2;
+		u3->x = uv1;
+		u3->y = uv2;
 		vec2* u4 = in->uvBuffer.get_new_item();//bot right
 		*u4 = *u1;
 		vec2* u5 = in->uvBuffer.get_new_item();//top right
 		*u5 = *u2;
 		vec2* u6 = in->uvBuffer.get_new_item();//top left
-		u6->x = *uv1 + *uv3;
-		u6->y = *uv2 + *uv4;
+		u6->x = uv1 + uv3;
+		u6->y = uv2 + uv4;
 
 /*		v1->pos.x = *x;
 		v1->pos.y = *y + *w*/;
