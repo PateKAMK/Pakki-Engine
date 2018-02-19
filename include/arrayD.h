@@ -91,6 +91,36 @@ public:
 		}
 		_size = new_size;
 	}
+	T* get_array(int size)
+	{
+		_size += size;
+		if (_size >= _allocated_size)
+		{
+			if(_allocated_size * 2 < _size)
+			{
+				_allocated_size = _size;
+				T* temp = data;
+				data = (T*)realloc(data, sizeof(T) *_allocated_size);
+				assert(data);
+				if (!data)
+				{
+					data = temp;
+				}
+			}
+			else
+			{
+				_allocated_size *= 2;
+				T* temp = data;
+				data = (T*)realloc(data, sizeof(T) *_allocated_size);
+				assert(data);
+				if (!data)
+				{
+					data = temp;
+				}
+			}
+		}
+		return &data[_size - size];
+	}
 	T* get_new_item()
 	{
 		if (_allocated_size == _size)

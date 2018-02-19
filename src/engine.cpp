@@ -39,6 +39,7 @@ GLenum glCheckError_(const char *file, int line)
 	return errorCode;
 }
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
+static terrainHandler* handle;
 void engine_init(engine* engine,Camera* camera,Shader* shader, float WorldX, float WorldY, float worldWidht, float WorldHeight)
 {
 #ifdef P_ANDROID
@@ -85,7 +86,8 @@ void engine_init(engine* engine,Camera* camera,Shader* shader, float WorldX, flo
 
 
 	InRender::init_renderer(&inrend);
-
+	handle = (terrainHandler*)malloc(sizeof(terrainHandler));
+	init_terrains(handle, WorldX, WorldY);
 	LOGI("engine inited\n");
 }
 //#ifdef P_WINDOWS
@@ -113,9 +115,9 @@ int engine_draw(engine* engine)
 	ret += render_batch(engine->batch,engine->shader,engine->spritecache, &engine->camera->cameraMatrix);
 
 	glCheckError();
-	//render_debug_lines(engine->drenderer,&engine->camera->cameraMatrix);
 	ret += 1;
 	InRender::render(&inrend, engine->spritecache->bindedTextures.textures[0].ID, &engine->camera->cameraMatrix);
+	render_debug_lines(engine->drenderer,&engine->camera->cameraMatrix);
 	glCheckError();
 
 	//free(tes);
@@ -157,12 +159,12 @@ void engine_events(engine* engine, double deltaTime, float fps)
 		{
 			if (mesh[(int)((h*100) + w)] == 0) continue;
 
-			float scale = 10;
+			float scale = 5;
 			float uv = 0;
 			float rw = w * scale - 100;
 			float rh = h * scale - 100;
 			float uv2 = 1;
-			InRender::push_to_renderer(&inrend, &rw, &rh, &scale, &uv, &uv, &uv2, &uv2);
+			InRender::push_to_renderer(&inrend, rw, rh, scale, uv,uv, uv2, uv2);
 		}
 	}
 
@@ -175,6 +177,8 @@ void engine_events(engine* engine, double deltaTime, float fps)
 		float scale = 100;
 		InRender::push_to_renderer(&inrend, &k , &k1, &scale, &k1, &k1, &k11,&k11);
 	}*/
+	v2 p{ engine->camera->position.x , engine->camera->position.y };
+	updateTerrain(handle, &inrend,  p,engine->drenderer);
 	InRender::create_buffers(&inrend);
 	update_camera(engine->camera);
 }
@@ -184,4 +188,5 @@ void engine_clearup(engine* engine)
 	dispose_batch(engine->batch);
 	dispose_shader(engine->shader);
 	dispose_debug_renderer(engine->drenderer);
+	dispose_terrain(handle);
 }

@@ -106,23 +106,23 @@ function updatePakki(dt)
     if(ffi.C.is_key_down("w"))then
         camposY = camposY + 2;
         ffi.C.set_camera(camposX,camposY,1);
-       print("w pressed")
+       --print("w pressed")
     end
 
     if(ffi.C.is_key_down("a"))then
         camposX = camposX - 2;
         ffi.C.set_camera(camposX,camposY,1);
-        print("a pressed" ,currentTime)
+       --print("a pressed" ,currentTime)
     end
     if(ffi.C.is_key_down("s"))then
         camposY = camposY - 2;
         ffi.C.set_camera(camposX,camposY,1);
-        print("s pressed" ,currentTime)
+       -- print("s pressed" ,currentTime)
     end
     if(ffi.C.is_key_down("d"))then
         camposX = camposX + 2;
         ffi.C.set_camera(camposX,camposY,1);
-        print("d pressed" ,currentTime)
+       -- print("d pressed" ,currentTime)
     end
     ffi.C.update_objects();
     for i = 1,#objects do

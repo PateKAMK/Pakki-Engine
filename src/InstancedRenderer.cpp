@@ -111,21 +111,21 @@ namespace InRender
 		v1->pos.y = y;
 		v1->scale = scale;
 
-
-		vec2* u1 = in->uvBuffer.get_new_item();//top left
+		vec2* buf = in->uvBuffer.get_array(6);
+		vec2* u1 = &buf[0];
 		u1->x = uv1;
 		u1->y = uv2 + uv4;
-		vec2* u2 = in->uvBuffer.get_new_item();//bot left
+		vec2* u2 = &buf[1];//bot left
 		u2->x = uv1 + uv3;
 		u2->y = uv2;
-		vec2* u3 = in->uvBuffer.get_new_item();//bot right
+		vec2* u3 = &buf[2];//bot right
 		u3->x = uv1;
 		u3->y = uv2;
-		vec2* u4 = in->uvBuffer.get_new_item();//bot right
+		vec2* u4 = &buf[3];//bot right
 		*u4 = *u1;
-		vec2* u5 = in->uvBuffer.get_new_item();//top right
+		vec2* u5 = &buf[4];//top right
 		*u5 = *u2;
-		vec2* u6 = in->uvBuffer.get_new_item();//top left
+		vec2* u6 = &buf[5];//top left
 		u6->x = uv1 + uv3;
 		u6->y = uv2 + uv4;
 
