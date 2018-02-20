@@ -151,32 +151,7 @@ void engine_events(engine* engine, double deltaTime, float fps)
 	ObjectManager::draw_objects(&engine->objs->drawAbleOnes, engine->batch);
 	post_batch_process(engine->batch);
 	populate_debugrender_buffers(engine->drenderer);
-	/*tileId* mesh = NULL;
-	generate_mesh(&mesh);
-	for (float h = 0; h < 100; h++)
-	{
-		for (float w = 0; w < 100; w++)
-		{
-			if (mesh[(int)((h*100) + w)] == 0) continue;
 
-			float scale = 5;
-			float uv = 0;
-			float rw = w * scale - 100;
-			float rh = h * scale - 100;
-			float uv2 = 1;
-			InRender::push_to_renderer(&inrend, rw, rh, scale, uv,uv, uv2, uv2);
-		}
-	}
-
-		free(mesh);*/
-	/*for(int i = 0 ; i < 4 ;i++)
-	{
-		float k = 0 - i * 200;
-		float k1 = 0;
-		float k11 = 1;
-		float scale = 100;
-		InRender::push_to_renderer(&inrend, &k , &k1, &scale, &k1, &k1, &k11,&k11);
-	}*/
 	v2 p{ engine->camera->position.x , engine->camera->position.y };
 	updateTerrain(handle, &inrend,  p,engine->drenderer);
 	InRender::create_buffers(&inrend);

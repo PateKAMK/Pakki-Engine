@@ -7,7 +7,7 @@ static int c = 0;
 void createMesh(uint8_t* mesh, float x, float y,float scale)
 {
 	constexpr float dim = DIMENSION / 2.f;
-	printf("GENERATING --%f -- %f\n", x, y);
+	//printf("GENERATING --%f -- %f\n", x, y);
 //	float inc = scale / (float)DIMENSION;
 	float height = y - dim;
 	for (int h = 0; h < DIMENSION; h++)
@@ -15,7 +15,7 @@ void createMesh(uint8_t* mesh, float x, float y,float scale)
 		float widht = x - dim;
 		for (int w = 0; w < DIMENSION; w++)
 		{
-			float val = stb_perlin_noise3(widht / 50.f, height / 50.f, 1, 256, 256, 256);
+			float val = stb_perlin_noise3(widht / 300.f, height / 300.f, 1, 256, 256, 256);
 			tileId n = (tileId)(val < -0.2? 0 : 1);
 			mesh[(h  *  DIMENSION) + w] = n;
 			widht += scale;
@@ -30,7 +30,7 @@ void init_terrains(terrainHandler* ter, float worldX,float worldY)
 	ter->meshAllocator = (uint8_t*)malloc(sizeof(uint8_t) * DIMENSION * DIMENSION * 9);
 	ter->terrainAllocator.init_pool();
 	ter->update = false;
-	ter->scale = 2;
+	ter->scale = 1.f;
 	for(int y = 0; y < 9; y++)
 	{
 		ter->meshes[y] = &ter->meshAllocator[DIMENSION * DIMENSION * y];
@@ -101,7 +101,7 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 	float xp = ter->currentTerrainsHandles[1 * 3 + 1]->pos.x - worldPos.x;
 	float yp = ter->currentTerrainsHandles[1 * 3 + 1]->pos.y - worldPos.y;
 
-	if(abs(xp) > (DIMENSION * ter->scale))
+	if(abs(xp) > (DIMENSION * ter->scale * 0.5f))
 	{
 
 
@@ -164,6 +164,9 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 				//createMesh(tMesh, m->xP - 1, m->yP - 1);
 			}
 			// change old out and new in
+			uint8_t* tt = ter->meshes[3 * 2 + 2];
+			uint8_t* mm = ter->meshes[3 * 1 + 2];
+			uint8_t* bb = ter->meshes[3 * 0 + 2];
 			ter->currentTerrainsHandles[3 * 2 + 2] = ter->currentTerrainsHandles[3 * 2 + 1];
 			ter->currentTerrainsHandles[3 * 1 + 2] = ter->currentTerrainsHandles[3 * 1 + 1];
 			ter->currentTerrainsHandles[3 * 0 + 2] = ter->currentTerrainsHandles[3 * 0 + 1];
@@ -185,12 +188,15 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 			ter->currentTerrainsHandles[3 * 1 ] = mN;
 			ter->currentTerrainsHandles[3 * 0 ] = bN;
 
-			//createMesh(ter->meshes[3 * 2], tN->pos.x, tN->pos.y,ter->scale);
-			//createMesh(ter->meshes[3 * 1], mN->pos.x, mN->pos.y, ter->scale);
-			//createMesh(ter->meshes[3 * 0], bN->pos.x, bN->pos.y, ter->scale);
-			memset(ter->meshes[3 * 2], 0, sizeof(uint8_t)* DIMENSION * DIMENSION);
-			memset(ter->meshes[3 * 1], 0, sizeof(uint8_t)* DIMENSION * DIMENSION);
-			memset(ter->meshes[3 * 0], 0, sizeof(uint8_t)* DIMENSION * DIMENSION);
+			ter->meshes[3 * 2 ] = tt;
+			ter->meshes[3 * 1 ] = mm;
+			ter->meshes[3 * 0 ] = bb;
+			createMesh(ter->meshes[3 * 2], tN->pos.x, tN->pos.y,ter->scale);
+			createMesh(ter->meshes[3 * 1], mN->pos.x, mN->pos.y, ter->scale);
+			createMesh(ter->meshes[3 * 0], bN->pos.x, bN->pos.y, ter->scale);
+			//memset(ter->meshes[3 * 2], 0, sizeof(uint8_t)* DIMENSION * DIMENSION);
+			//memset(ter->meshes[3 * 1], 0, sizeof(uint8_t)* DIMENSION * DIMENSION);
+			//memset(ter->meshes[3 * 0], 0, sizeof(uint8_t)* DIMENSION * DIMENSION);
 
 
 		}
@@ -250,6 +256,11 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 				//createMesh(tMesh, m->xP + 1, m->yP - 1);
 			}
 			// change old out and new in
+			// change old out and new in
+			uint8_t* tt = ter->meshes[3 * 2 ];
+			uint8_t* mm = ter->meshes[3 * 1 ];
+			uint8_t* bb = ter->meshes[3 * 0 ];
+
 			ter->currentTerrainsHandles[3 * 2 ] = ter->currentTerrainsHandles[3 * 2 + 1];
 			ter->currentTerrainsHandles[3 * 1 ] = ter->currentTerrainsHandles[3 * 1 + 1];
 			ter->currentTerrainsHandles[3 * 0 ] = ter->currentTerrainsHandles[3 * 0 + 1];
@@ -270,12 +281,17 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 			ter->currentTerrainsHandles[3 * 1 + 2] = mN;
 			ter->currentTerrainsHandles[3 * 0 + 2] = bN;
 
+			ter->meshes[3 * 2 + 2] = tt;
+			ter->meshes[3 * 1 + 2] = mm;
+			ter->meshes[3 * 0 + 2] = bb;
+
+
 			createMesh(ter->meshes[3 * 2 + 2], tN->pos.x, tN->pos.y,ter->scale);
 			createMesh(ter->meshes[3 * 1 + 2], mN->pos.x, mN->pos.y, ter->scale);
 			createMesh(ter->meshes[3 * 0 + 2], bN->pos.x, bN->pos.y, ter->scale);
 		}
 	}
-	if(abs(yp) > (DIMENSION * ter->scale))
+	if(abs(yp) > (DIMENSION * ter->scale* 0.5f))
 	{
 
 
@@ -283,13 +299,13 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 		terrain* mN = NULL;
 		terrain* rN = NULL;
 
-		if (yp < 0) // move down
+		if (yp > 0) // move down
 		{
-			int lX = ter->currentTerrainsHandles[0]->xP - 1;
+			int lX = ter->currentTerrainsHandles[0]->xP;
 			int lY = ter->currentTerrainsHandles[0]->yP - 1;
 			int mX = ter->currentTerrainsHandles[1]->xP;
 			int mY = ter->currentTerrainsHandles[1]->yP - 1;
-			int rX = ter->currentTerrainsHandles[2]->xP + 1;
+			int rX = ter->currentTerrainsHandles[2]->xP;
 			int rY = ter->currentTerrainsHandles[2]->yP - 1;
 
 			for (int i = 0; i < ter->allTerrains._size; i++) // not visited
@@ -312,8 +328,8 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 				terrain* m = ter->currentTerrainsHandles[0];
 				//uint8_t* tMesh = (uint8_t*)malloc(sizeof(uint8_t)*DIMENSION*DIMENSION);
 				//tN = (terrain*)malloc(sizeof(terrain));
-				v2 newPos{ m->pos.x - (DIMENSION * ter->scale),m->pos.y - (DIMENSION * ter->scale) };
-				lN = createNewTerrain(&ter->terrainAllocator, &ter->allTerrains, m->xP - 1, m->yP - 1, newPos);
+				v2 newPos{ m->pos.x ,m->pos.y - (DIMENSION * ter->scale) };
+				lN = createNewTerrain(&ter->terrainAllocator, &ter->allTerrains, m->xP, m->yP - 1, newPos);
 				//createMesh(tMesh, m->xP - 1, m->yP + 1);
 			}
 			if (mN == NULL)
@@ -330,11 +346,16 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 				terrain* m = ter->currentTerrainsHandles[2];
 				//uint8_t* tMesh = (uint8_t*)malloc(sizeof(uint8_t)*DIMENSION*DIMENSION);
 				//tN = (terrain*)malloc(sizeof(terrain));
-				v2 newPos{ m->pos.x + (DIMENSION * ter->scale),m->pos.y - (DIMENSION * ter->scale) };
-				rN = createNewTerrain(&ter->terrainAllocator, &ter->allTerrains, m->xP + 1, m->yP - 1, newPos);
+				v2 newPos{ m->pos.x ,m->pos.y - (DIMENSION * ter->scale) };
+				rN = createNewTerrain(&ter->terrainAllocator, &ter->allTerrains, m->xP, m->yP - 1, newPos);
 				//createMesh(tMesh, m->xP - 1, m->yP + 1);
 			}
 			
+
+			uint8_t* ll = ter->meshes[3 * 2];
+			uint8_t* mm = ter->meshes[3 * 2 + 1];
+			uint8_t* rr = ter->meshes[3 * 2 + 2];
+
 			ter->currentTerrainsHandles[3 * 2] = ter->currentTerrainsHandles[3 * 1 ];
 			ter->currentTerrainsHandles[3 * 2 + 1] = ter->currentTerrainsHandles[3 * 1 + 1];
 			ter->currentTerrainsHandles[3 * 2 + 2] = ter->currentTerrainsHandles[3 * 1 + 2];
@@ -351,22 +372,26 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 			ter->meshes[3 * 1 + 1] = ter->meshes[3 * 0 + 1];
 			ter->meshes[3 * 1 + 2] = ter->meshes[3 * 0 + 2];
 
-			ter->currentTerrainsHandles[3 * 0 + 0] = rN;
+			ter->currentTerrainsHandles[3 * 0 + 0] = lN;
 			ter->currentTerrainsHandles[3 * 0 + 1] = mN;
-			ter->currentTerrainsHandles[3 * 0 + 2] = lN;
+			ter->currentTerrainsHandles[3 * 0 + 2] = rN;
 
-			createMesh(ter->meshes[3 * 0 + 0], rN->pos.x, rN->pos.y,ter->scale);
+			ter->meshes[3 * 0 + 0] = ll;
+			ter->meshes[3 * 0 + 1] = mm;
+			ter->meshes[3 * 0 + 2] = rr;
+
+			createMesh(ter->meshes[3 * 0 + 0], lN->pos.x, lN->pos.y,ter->scale);
 			createMesh(ter->meshes[3 * 0 + 1], mN->pos.x, mN->pos.y, ter->scale);
-			createMesh(ter->meshes[3 * 0 + 2], lN->pos.x, lN->pos.y, ter->scale);
+			createMesh(ter->meshes[3 * 0 + 2], rN->pos.x, rN->pos.y, ter->scale);
 
 		}
 		else // move up
 		{
-			int lX = ter->currentTerrainsHandles[3 * 2]->xP - 1;
+			int lX = ter->currentTerrainsHandles[3 * 2]->xP ;
 			int lY = ter->currentTerrainsHandles[3 * 2]->yP + 1;
 			int mX = ter->currentTerrainsHandles[3 * 2 + 1]->xP;
 			int mY = ter->currentTerrainsHandles[3 * 2 + 1]->yP + 1;
-			int rX = ter->currentTerrainsHandles[3 * 2 + 2]->xP + 1;
+			int rX = ter->currentTerrainsHandles[3 * 2 + 2]->xP ;
 			int rY = ter->currentTerrainsHandles[3 * 2 + 2]->yP + 1;
 
 			for (int i = 0; i < ter->allTerrains._size; i++) // not visited
@@ -389,8 +414,8 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 				terrain* m = ter->currentTerrainsHandles[3 * 2];
 				//uint8_t* tMesh = (uint8_t*)malloc(sizeof(uint8_t)*DIMENSION*DIMENSION);
 				//tN = (terrain*)malloc(sizeof(terrain));
-				v2 newPos{ m->pos.x - (DIMENSION * ter->scale),m->pos.y + (DIMENSION * ter->scale) };
-				lN = createNewTerrain(&ter->terrainAllocator, &ter->allTerrains, m->xP - 1, m->yP + 1, newPos);
+				v2 newPos{ m->pos.x ,m->pos.y + (DIMENSION * ter->scale) };
+				lN = createNewTerrain(&ter->terrainAllocator, &ter->allTerrains, m->xP, m->yP + 1, newPos);
 				//createMesh(tMesh, m->xP - 1, m->yP + 1);
 			}
 			if (mN == NULL)
@@ -404,13 +429,17 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 			}
 			if (rN == NULL)
 			{
-				terrain* m = ter->currentTerrainsHandles[3 * 2 + 1];
+				terrain* m = ter->currentTerrainsHandles[3 * 2 + 2];
 				//uint8_t* tMesh = (uint8_t*)malloc(sizeof(uint8_t)*DIMENSION*DIMENSION);
 				//tN = (terrain*)malloc(sizeof(terrain));
-				v2 newPos{ m->pos.x + (DIMENSION * ter->scale),m->pos.y + (DIMENSION * ter->scale) };
-				rN = createNewTerrain(&ter->terrainAllocator, &ter->allTerrains, m->xP + 1, m->yP + 1, newPos);
+				v2 newPos{ m->pos.x ,m->pos.y + (DIMENSION * ter->scale) };
+				rN = createNewTerrain(&ter->terrainAllocator, &ter->allTerrains, m->xP, m->yP + 1, newPos);
 				//createMesh(tMesh, m->xP - 1, m->yP + 1);
 			}
+
+			uint8_t* ll = ter->meshes[3 * 0];
+			uint8_t* mm = ter->meshes[3 * 0 + 1];
+			uint8_t* rr = ter->meshes[3 * 0 + 2];
 
 			ter->currentTerrainsHandles[3 * 0] = ter->currentTerrainsHandles[3 * 1];
 			ter->currentTerrainsHandles[3 * 0 + 1] = ter->currentTerrainsHandles[3 * 1 + 1];
@@ -428,13 +457,17 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 			ter->meshes[3 * 1 + 1] = ter->meshes[3 * 2 + 1];
 			ter->meshes[3 * 1 + 2] = ter->meshes[3 * 2 + 2];
 
-			ter->currentTerrainsHandles[3 * 2 + 0] = rN;
+			ter->currentTerrainsHandles[3 * 2 + 0] = lN; //bug
 			ter->currentTerrainsHandles[3 * 2 + 1] = mN;
-			ter->currentTerrainsHandles[3 * 2 + 2] = lN;
+			ter->currentTerrainsHandles[3 * 2 + 2] = rN;
 
-			createMesh(ter->meshes[3 * 2 + 0], rN->pos.x, rN->pos.y,ter->scale);
+			ter->meshes[3 * 2 + 0] = ll;
+			ter->meshes[3 * 2 + 1] = mm;
+			ter->meshes[3 * 2 + 2] = rr;
+
+			createMesh(ter->meshes[3 * 2 + 0], lN->pos.x, lN->pos.y,ter->scale);
 			createMesh(ter->meshes[3 * 2 + 1], mN->pos.x, mN->pos.y, ter->scale);
-			createMesh(ter->meshes[3 * 2 + 2], lN->pos.x, lN->pos.y, ter->scale);
+			createMesh(ter->meshes[3 * 2 + 2], rN->pos.x, rN->pos.y, ter->scale);
 		}
 	}
 
@@ -454,9 +487,13 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 				uint8_t* mesh = ter->meshes[h * 3 + w];
 				for (int hter = 0; hter < DIMENSION; hter++)
 				{
+					float screenH = abs(((current->pos.y - (DIMENSION * 0.5 * ter->scale)) + hter * ter->scale) - worldPos.y);
+					if (screenH > 410) continue;
 					for (int wter = 0; wter < DIMENSION; wter++)
 					{
-						if(mesh[hter*DIMENSION + wter] > 0)
+
+						float xpos = ((current->pos.x - (DIMENSION * 0.5 * ter->scale)) + wter * ter->scale);
+						if(mesh[hter*DIMENSION + wter] > 0 && abs(xpos - worldPos.x) < 610)
 						{
 						/*	printf("-- %d -- %d -- %d -- %d\n", hter, wter,w,h);
 
@@ -466,7 +503,7 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 							}
 */
 							InRender::push_to_renderer(rend,((current->pos.x - (DIMENSION * 0.5 * ter->scale)) + wter * ter->scale) ,
-								((current->pos.y - (DIMENSION * 0.5 * ter->scale)) + hter * ter->scale), ter->scale, 0, 0, 1, 1);
+								((current->pos.y - (DIMENSION * 0.5 * ter->scale)) + hter * ter->scale), ter->scale, 0);
 
 
 						}
@@ -479,6 +516,24 @@ void updateTerrain(terrainHandler* ter,InRender::instaRenderer* rend,v2 worldPos
 		}
 	}
 	ter->update = false;
+
+}
+
+float delete_terrain(terrainHandler* ter,float x,float y, float r)
+{
+	int i = 0;
+
+	for(; i < 9; i++)
+	{
+		terrain* cur = ter->currentTerrainsHandles[i];
+		float xD = abs(cur->pos.x - x);
+		float yD = abs(cur->pos.y - y);
+		if (xD < DIMENSION * 0.5 * ter->scale && yD < DIMENSION * 0.5 * ter->scale) break;
+	}
+
+	return 1;
+
+
 
 }
 //void generate_mesh(tileId** mesh)

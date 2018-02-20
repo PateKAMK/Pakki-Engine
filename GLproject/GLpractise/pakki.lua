@@ -78,7 +78,7 @@ function initPakki()
     objects[numObjs] = {}
     objects[numObjs].cdata = ffi.C.get_object_moving(0,0,40,40)
     objects[numObjs].cdata[0].i = numObjs
-    objects[numObjs].cdata[0].drawPtr = ffi.C.load_picture("laatikko.jpg")
+    objects[numObjs].cdata[0].drawPtr = ffi.C.load_picture("download.jpg")
     player = numObjs;
     numObjs = numObjs + 1
 
@@ -88,7 +88,7 @@ function initPakki()
     objects[numObjs] = {}
     objects[numObjs].cdata = ffi.C.get_object_static(-100 + i * 80,-80,50,50)
     objects[numObjs].cdata[0].i = numObjs
-    objects[numObjs].cdata[0].drawPtr = ffi.C.load_picture("laatikko.jpg")
+    objects[numObjs].cdata[0].drawPtr = ffi.C.load_picture("download.jpg")
     numObjs = numObjs + 1
     end
     

@@ -257,7 +257,10 @@ EXPORT void update_objects()
 {
 	ObjectManager::update_objects(luaobjs);
 }
+EXPORT void destroy_terrain(float xpos, float ypos, float radius)
+{
 
+}
 
 
 int main(int argc, const char **argv)
@@ -384,7 +387,7 @@ int main(int argc, const char **argv)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	float time[10]{0};
+	float time[200]{0};
 	const float fpsUpdateRate = 1.0f;
 	float lastTime = 0;
 	float updating = 0;
@@ -421,7 +424,7 @@ int main(int argc, const char **argv)
 		start_frame(&context,glm::vec2(inputs.xMouse,inputs.yMouse),button);
 		double newTime = glfwGetTime();
 		time[index++] = (float)newTime - lastTime;
-		if (index >= 10)index = 0;
+		if (index >= 200)index = 0;
 		updating += newTime - lastTime;
 		lastTime = (float)newTime;
 
@@ -449,7 +452,7 @@ int main(int argc, const char **argv)
 		{
 			Pakki::window(&context, GEN_ID,Pakki::Window_No_Header);
 			Pakki::text(&context, "FPS %d", (int) currentFps);
-			Pakki::text(&context, "FrameTime %f", time[index]*1000);
+			Pakki::text(&context, "FrameTime %f", 1 /  currentFps * 1000.f); // time[index]*1000);
 			Pakki::text(&context, "NumDrawcalls %d",num_draw_calls);
 			Pakki::text(&context, "objects %d", 0);
 			Pakki::end_window(&context);
@@ -467,11 +470,11 @@ int main(int argc, const char **argv)
 		if(updating > fpsUpdateRate)
 		{
 			float add = 0;
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 200; i++)
 			{
 				add += time[i];
 			}
-			currentFps = 1.f / (add / 10.f);
+			currentFps = 1.f / (add / 200.f);
 			updating = 0;
 		}
 		double frameTime = newTime - currentTime;

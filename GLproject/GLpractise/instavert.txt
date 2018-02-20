@@ -1,7 +1,7 @@
 #version 330 core
 
 
-layout (location = 0) in vec2 uv;
+layout (location = 0) in int uv;
 layout (location = 1) in vec2 vert;
 layout (location = 2) in vec2 pos;
 layout (location = 3) in float scale;
@@ -12,6 +12,9 @@ uniform mat4 P;
 out vec2 _uv;
 
 
+const int MONTEXT = 1;
+const int MONTEXTHEIGHT = 1;
+
 void main()
 {
 	vec2 position = (vert*scale) + pos;
@@ -20,7 +23,46 @@ void main()
     gl_Position.w = 1.0;
 	
 	
+	float XX = vert.x + 0.5;
+	float YY = vert.y + 0.5;
 	
 	
-	_uv = vec2(uv.x, 1.0 - uv.y);//uv;
+	float x = uv % MONTEXT;
+
+	float y = (uv - x )/MONTEXT;
+
+
+
+
+	float xUV = (XX + x) / MONTEXT;
+	float yUV =   1.0 - ((YY + y) / MONTEXTHEIGHT);
+	
+	
+	
+	_uv = vec2(xUV, 1.0 - yUV);//uv;
 }
+
+/*
+eetun pseudo
+
+float XX = uv.x + 0.5;
+float YY = uv.y + 0.5;
+
+// pistä id textuurin positioks
+
+const int MONTEXT = 3;
+const int MONTEXTHEIGHT = 3;
+float x = id % MONTEXT;
+
+float y = (ind - x )/MONTEXT;
+
+
+
+
+float xUV = (XX + x) / MONTEXT;
+float yUV =   1- ((YY + y) / MONTEXTHEIGHT);
+
+[6][7][8]
+[3][4][5]
+[0][1][2]
+*/

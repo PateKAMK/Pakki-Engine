@@ -57,10 +57,10 @@ namespace InRender
 
 		glBufferData(GL_ARRAY_BUFFER, 1000 * sizeof(inVertex), NULL, GL_DYNAMIC_DRAW);// bind later  positions + scale
 
-		glGenBuffers(1, &in->uv);
-		glBindBuffer(GL_ARRAY_BUFFER, in->uv);
+		//glGenBuffers(1, &in->uv);
+		//glBindBuffer(GL_ARRAY_BUFFER, in->uv);
 
-		glBufferData(GL_ARRAY_BUFFER, 10000 * sizeof(vec2), NULL, GL_DYNAMIC_DRAW);// bind later  uv for each vertex
+		//glBufferData(GL_ARRAY_BUFFER, 10000* sizeof(GLbyte)/* * sizeof(vec2*/), NULL, GL_DYNAMIC_DRAW);// bind later  uv for each vertex
 
 
 		glGenBuffers(1, &in->vertex);
@@ -76,17 +76,23 @@ namespace InRender
 		glEnableVertexAttribArray(3);
 
 		//this is the uv attribute pointer
-		glBindBuffer(GL_ARRAY_BUFFER, in->uv);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), (void*)0);
+		//glBindBuffer(GL_ARRAY_BUFFER, in->uv);
+		//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLbyte/*vec2*/), (void*)0);
 		//glVertexAttribDivisor(0, 1); dont set?
 		//vertexposition
 		glBindBuffer(GL_ARRAY_BUFFER, in->vertex);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)0);
 		glVertexAttribDivisor(1, 0);//vert
-		//position
+		//position + text id
 		glBindBuffer(GL_ARRAY_BUFFER, in->position);
+
+		glVertexAttribPointer(0, 1, GL_BYTE, GL_FALSE, sizeof(inVertex), (void*)offsetof(inVertex, id));
+		glVertexAttribDivisor(0, 1);//pos
+
+
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(inVertex), (void*)offsetof(inVertex,pos));
 		glVertexAttribDivisor(2, 1);//pos
+
 		//scale
 		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(inVertex), (void*)offsetof(inVertex, scale));
 		glVertexAttribDivisor(3, 1);//scale
@@ -100,34 +106,35 @@ namespace InRender
 		glBindVertexArray(0);
 
 		in->positionbuffer.init_array(1000);
-		in->uvBuffer.init_array(10000);
+		//in->uvBuffer.init_array(10000);
 	}
 	static int num  = 0;
-	void push_to_renderer(instaRenderer* in, const float& x, const float& y,const float& scale, const float& uv1, const float& uv2, const float& uv3, const float& uv4)
+	void push_to_renderer(instaRenderer* in, const float& x, const float& y,const float& scale,const int& uvid/* const float& uv1, const float& uv2, const float& uv3, const float& uv4*/)
 	{
 		num++;
 		inVertex* v1 = in->positionbuffer.get_new_item();//topleft
 		v1->pos.x = x;
 		v1->pos.y = y;
 		v1->scale = scale;
+		v1->id = uvid;
 
-		vec2* buf = in->uvBuffer.get_array(6);
-		vec2* u1 = &buf[0];
-		u1->x = uv1;
-		u1->y = uv2 + uv4;
-		vec2* u2 = &buf[1];//bot left
-		u2->x = uv1 + uv3;
-		u2->y = uv2;
-		vec2* u3 = &buf[2];//bot right
-		u3->x = uv1;
-		u3->y = uv2;
-		vec2* u4 = &buf[3];//bot right
-		*u4 = *u1;
-		vec2* u5 = &buf[4];//top right
-		*u5 = *u2;
-		vec2* u6 = &buf[5];//top left
-		u6->x = uv1 + uv3;
-		u6->y = uv2 + uv4;
+		//vec2* buf = in->uvBuffer.get_array(6);
+		//vec2* u1 = &buf[0];
+		//u1->x = uv1;
+		//u1->y = uv2 + uv4;
+		//vec2* u2 = &buf[1];//bot left
+		//u2->x = uv1 + uv3;
+		//u2->y = uv2;
+		//vec2* u3 = &buf[2];//bot right
+		//u3->x = uv1;
+		//u3->y = uv2;
+		//vec2* u4 = &buf[3];//bot right
+		//*u4 = *u1;
+		//vec2* u5 = &buf[4];//top right
+		//*u5 = *u2;
+		//vec2* u6 = &buf[5];//top left
+		//u6->x = uv1 + uv3;
+		//u6->y = uv2 + uv4;
 
 /*		v1->pos.x = *x;
 		v1->pos.y = *y + *w*/;
@@ -171,9 +178,9 @@ namespace InRender
 		glBufferData(GL_ARRAY_BUFFER, in->positionbuffer._size * sizeof(inVertex), NULL, GL_DYNAMIC_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
 		glBufferSubData(GL_ARRAY_BUFFER, 0, in->positionbuffer._size * sizeof(inVertex), in->positionbuffer.data);
 
-		glBindBuffer(GL_ARRAY_BUFFER, in->uv);
+		/*glBindBuffer(GL_ARRAY_BUFFER, in->uv);
 		glBufferData(GL_ARRAY_BUFFER, in->uvBuffer._size * sizeof(vec2), NULL, GL_DYNAMIC_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER,0, in->uvBuffer._size*sizeof(vec2), in->uvBuffer.data);
+		glBufferSubData(GL_ARRAY_BUFFER,0, in->uvBuffer._size*sizeof(vec2), in->uvBuffer.data);*/
 
 		
 		glBindBuffer(GL_ARRAY_BUFFER, in->vertex);
@@ -183,7 +190,7 @@ namespace InRender
 
 		in->num_items = in->positionbuffer._size;
 		in->positionbuffer.clear_array();
-		in->uvBuffer.clear_array();
+		//in->uvBuffer.clear_array();
 	}
 	void render(instaRenderer* in,GLuint tex,glm::mat4x4* camMatrix)
 	{

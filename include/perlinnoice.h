@@ -11,7 +11,7 @@ struct v2
 	float y;
 };
 
-#define DIMENSION 100
+#define DIMENSION 300//120
 
 struct terrain
 {
